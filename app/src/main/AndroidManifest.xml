@@ -13,6 +13,12 @@
         android:theme="@style/Theme.TestApp"
         tools:targetApi="31">
         <activity
+            android:name=".screens.AddCartActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.AddFoodActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.LandingActivity"
             android:exported="false" />
         <activity

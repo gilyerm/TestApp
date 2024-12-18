@@ -115,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 Log.d(TAG, "onCompleted: User registered successfully");
                 String uid = authenticationService.getCurrentUser().getUid();
                 User user = new User(uid, username, email);
-                databaseService.createNewUser(user, new DatabaseService.DatabaseCallback() {
+                databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {
                     @Override
                     public void onCompleted(Object object) {
                         Log.d(TAG, "onCompleted: User registered successfully");

@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
     private AuthenticationService authenticationService;
-    private Button btnSignOut;
+    private Button btnSignOut, btnAddFood, btnAddCart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         btnSignOut = findViewById(R.id.btn_main_signout);
+        btnAddFood = findViewById(R.id.btn_main_add_food);
+        btnAddCart = findViewById(R.id.btn_main_add_cart);
+
         btnSignOut.setOnClickListener(this);
+        btnAddFood.setOnClickListener(this);
+        btnAddCart.setOnClickListener(this);
+
+
     }
 
     @Override
@@ -63,6 +70,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent landingIntent = new Intent(MainActivity.this, LandingActivity.class);
             startActivity(landingIntent);
             finish();
+            return;
+        }
+        if (v.getId() == btnAddFood.getId()) {
+            Log.d(TAG, "Add food button clicked");
+            Intent addFoodIntent = new Intent(MainActivity.this, AddFoodActivity.class);
+            startActivity(addFoodIntent);
+            return;
+        }
+        if (v.getId() == btnAddCart.getId()) {
+            Log.d(TAG, "Add cart button clicked");
+            Intent addCartIntent = new Intent(MainActivity.this, AddCartActivity.class);
+            startActivity(addCartIntent);
+            return;
         }
     }
 }

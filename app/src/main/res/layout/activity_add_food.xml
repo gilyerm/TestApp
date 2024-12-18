@@ -5,20 +5,19 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".screens.LandingActivity">
+    tools:context=".screens.AddFoodActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Landing"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:text="Add Food"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
@@ -27,21 +26,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/btn_landing_login"
+        <EditText
+            android:id="@+id/food_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:padding="10dp"
-            android:text="Login" />
+            android:hint="Food Name" />
 
-        <Button
-            android:id="@+id/btn_landing_register"
+        <EditText
+            android:id="@+id/food_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="Register" />
+            android:hint="Food Price"
+            android:inputType="numberDecimal" />
 
+        <Button
+            android:id="@+id/add_food_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Food" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
