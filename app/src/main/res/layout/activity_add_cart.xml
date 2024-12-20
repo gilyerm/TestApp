@@ -8,7 +8,7 @@
     tools:context=".screens.AddCartActivity">
 
     <Spinner
-        android:id="@+id/spinner_food_addcart"
+        android:id="@+id/spinner_food_add_cart"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
@@ -34,7 +34,8 @@
         app:layout_constraintBottom_toTopOf="@+id/btn_create_add_cart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_add_cart" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_cart"
+        tools:listitem="@layout/item_selected_food" />
 
     <Button
         android:id="@+id/btn_create_add_cart"

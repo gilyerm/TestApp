@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Cart {
 
+    /// unique id of the cart
     private String id;
 
     private final ArrayList<Food> foods;

@@ -2,12 +2,13 @@ package com.example.testapp.models;
 
 import androidx.annotation.NonNull;
 
-// single Food
-// for example, a single item in a menu
-// or a single item in a shopping cart
-// tomato, apple, etc.
+/// single Food
+/// for example, a single item in a menu
+/// or a single item in a shopping cart
+/// tomato, apple, etc.
 public class Food {
 
+    /// unique id of the food
     private String id;
 
     // name of the food
@@ -16,13 +17,16 @@ public class Food {
     // price of the food
     private double price;
 
+    private String imageBase64;
+
     // constructor
     public Food() {
     }
-    public Food(String id, String name, double price) {
+    public Food(String id, String name, double price, String imageBase64) {
         this.id = id;
         this.name = name;
         this.price = price;
+        this.imageBase64 = imageBase64;
     }
 
     public String getId() {
@@ -53,6 +57,16 @@ public class Food {
         this.price = price;
     }
 
+    public String getImageBase64() {
+        return imageBase64;
+    }
+
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
+    }
+
+
+
     // toString method
     @NonNull
     @Override
@@ -60,7 +74,8 @@ public class Food {
         return "Food{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", price=" + price +
+                ", price=" + price + '\'' +
+                ", imageBase64='" + imageBase64 + '\'' +
                 '}';
     }
 

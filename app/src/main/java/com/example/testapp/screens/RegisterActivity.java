@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,13 +21,17 @@ import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 
+/// Activity for registering the user
+/// This activity is used to register the user
+/// It contains fields for the user to enter their information
+/// It also contains a button to register the user
+/// When the user is registered, they are redirected to the main activity
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "RegisterActivity";
 
-    private EditText etUsername, etEmail, etPassword;
+    private EditText etEmail, etPassword, etFName, etLName, etPhone;
     private Button btnRegister;
-
     private AuthenticationService authenticationService;
     private DatabaseService databaseService;
 
@@ -34,6 +39,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        /// set the layout for the activity
         setContentView(R.layout.activity_register);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -41,14 +47,20 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return insets;
         });
 
+        /// get the instance of the authentication service
         authenticationService = AuthenticationService.getInstance();
+        /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
 
-        etUsername = findViewById(R.id.et_register_username);
+        /// get the views
         etEmail = findViewById(R.id.et_register_email);
         etPassword = findViewById(R.id.et_register_password);
+        etFName = findViewById(R.id.et_register_first_name);
+        etLName = findViewById(R.id.et_register_last_name);
+        etPhone = findViewById(R.id.et_register_phone);
         btnRegister = findViewById(R.id.btn_register_register);
 
+        /// set the click listener
         btnRegister.setOnClickListener(this);
     }
 
@@ -57,80 +69,132 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         if (v.getId() == btnRegister.getId()) {
             Log.d(TAG, "onClick: Register button clicked");
 
-            String username = etUsername.getText().toString();
+            /// get the input from the user
             String email = etEmail.getText().toString();
             String password = etPassword.getText().toString();
+            String fName = etFName.getText().toString();
+            String lName = etLName.getText().toString();
+            String phone = etPhone.getText().toString();
 
-            Log.d(TAG, "onClick: Username: " + username);
+            /// log the input
             Log.d(TAG, "onClick: Email: " + email);
             Log.d(TAG, "onClick: Password: " + password);
+            Log.d(TAG, "onClick: First Name: " + fName);
+            Log.d(TAG, "onClick: Last Name: " + lName);
+            Log.d(TAG, "onClick: Phone: " + phone);
 
-            // Validate input
+
+            /// Validate input
             Log.d(TAG, "onClick: Validating input...");
-            if (!checkInput(username, email, password)) {
+            if (!checkInput(email, password, fName, lName, phone)) {
+                /// stop if input is invalid
                 return;
             }
 
             Log.d(TAG, "onClick: Registering user...");
 
-            // Register user
-            registerUser(username, email, password);
-            return;
+            /// Register user
+            registerUser(email, password, fName, lName, phone);
         }
     }
 
-    private boolean checkInput(String username, String email, String password) {
-        if (!Validator.isUsernameValid(username)) {
-            Log.e(TAG, "checkInput: Username must be at least 3 characters long");
-            etUsername.setError("Username must be at least 3 characters long");
-            etUsername.requestFocus();
-            return false;
-        }
+    /// Check if the input is valid
+    /// @return true if the input is valid, false otherwise
+    /// @see Validator
+    private boolean checkInput(String email, String password, String fName, String lName, String phone) {
 
         if (!Validator.isEmailValid(email)) {
             Log.e(TAG, "checkInput: Invalid email address");
+            /// show error message to user
             etEmail.setError("Invalid email address");
+            /// set focus to email field
             etEmail.requestFocus();
             return false;
         }
 
         if (!Validator.isPasswordValid(password)) {
             Log.e(TAG, "checkInput: Password must be at least 8 characters long");
+            /// show error message to user
             etPassword.setError("Password must be at least 8 characters long");
+            /// set focus to password field
             etPassword.requestFocus();
             return false;
         }
 
+        if (!Validator.isNameValid(fName)) {
+            Log.e(TAG, "checkInput: First name must be at least 3 characters long");
+            /// show error message to user
+            etFName.setError("First name must be at least 3 characters long");
+            /// set focus to first name field
+            etFName.requestFocus();
+            return false;
+        }
+
+        if (!Validator.isNameValid(lName)) {
+            Log.e(TAG, "checkInput: Last name must be at least 3 characters long");
+            /// show error message to user
+            etLName.setError("Last name must be at least 3 characters long");
+            /// set focus to last name field
+            etLName.requestFocus();
+            return false;
+        }
+
+        if (!Validator.isPhoneValid(phone)) {
+            Log.e(TAG, "checkInput: Phone number must be at least 10 characters long");
+            /// show error message to user
+            etPhone.setError("Phone number must be at least 10 characters long");
+            /// set focus to phone field
+            etPhone.requestFocus();
+            return false;
+        }
+
+        Log.d(TAG, "checkInput: Input is valid");
         return true;
     }
 
-    private void registerUser(String username, String email, String password) {
-        // Register user
+    /// Register the user
+    private void registerUser(String email, String password, String fName, String lName, String phone) {
         Log.d(TAG, "registerUser: Registering user...");
 
-        authenticationService.signUp(email, password, new AuthenticationService.AuthCallback() {
+        /// call the sign up method of the authentication service
+        authenticationService.signUp(email, password, new AuthenticationService.AuthCallback<>() {
 
             @Override
-            public void onCompleted(Object object) {
+            public void onCompleted(String uid) {
                 Log.d(TAG, "onCompleted: User registered successfully");
-                String uid = authenticationService.getCurrentUser().getUid();
-                User user = new User(uid, username, email);
+                /// create a new user object
+                User user = new User();
+                user.setUid(uid);
+                user.setEmail(email);
+                user.setPassword(password);
+                user.setFName(fName);
+                user.setLName(lName);
+                user.setPhone(phone);
+
+                /// call the createNewUser method of the database service
                 databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {
+
                     @Override
-                    public void onCompleted(Object object) {
+                    public void onCompleted(Void object) {
                         Log.d(TAG, "onCompleted: User registered successfully");
+                        /// save the user to shared preferences
                         SharedPreferencesUtil.saveUser(RegisterActivity.this, user);
-                        // Redirect to MainActivity and clear back stack to prevent user from going back to register screen
                         Log.d(TAG, "onCompleted: Redirecting to MainActivity");
+                        /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
                         Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+                        /// clear the back stack (clear history) and start the MainActivity
                         mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(mainIntent);
-                        finish();
                     }
 
                     @Override
                     public void onFailed(Exception e) {
                         Log.e(TAG, "onFailed: Failed to register user", e);
+                        /// show error message to user
+                        Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
+                        /// sign out the user if failed to register
+                        /// this is to prevent the user from being logged in again
+                        authenticationService.signOut();
                     }
                 });
             }
@@ -138,7 +202,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "onFailed: Failed to register user", e);
-
+                /// show error message to user
+                Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
             }
         });
 

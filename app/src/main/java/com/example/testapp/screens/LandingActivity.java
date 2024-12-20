@@ -14,6 +14,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 
+/// Landing activity for the app
+/// This activity is the first activity that is shown when the app is first opened (when the user is not signed in)
+/// It contains buttons to navigate to the login and register activities
 public class LandingActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "LandingActivity";
@@ -24,6 +27,7 @@ public class LandingActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        /// set the layout for the activity
         setContentView(R.layout.activity_landing);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -31,9 +35,11 @@ public class LandingActivity extends AppCompatActivity implements View.OnClickLi
             return insets;
         });
 
+        /// get the views
         btnLogin = findViewById(R.id.btn_landing_login);
         btnRegister = findViewById(R.id.btn_landing_register);
 
+        /// set the click listeners
         btnLogin.setOnClickListener(this);
         btnRegister.setOnClickListener(this);
     }
