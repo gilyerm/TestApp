@@ -1,5 +1,6 @@
 package com.example.testapp.screens;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -9,22 +10,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
+import com.example.testapp.adapters.ImageSourceAdapter;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.ImageUtil;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 public class AddFoodActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -33,7 +38,6 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
 
     private EditText foodNameEditText, foodPriceEditText;
     private Button addFoodButton;
-    private ImageButton selectImageButton, captureImageButton;
     private ImageView foodImageView;
     private DatabaseService databaseService;
 
@@ -64,14 +68,15 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
         foodNameEditText = findViewById(R.id.food_name);
         foodPriceEditText = findViewById(R.id.food_price);
         addFoodButton = findViewById(R.id.add_food_button);
-        selectImageButton = findViewById(R.id.select_image_button);
-        captureImageButton = findViewById(R.id.capture_image_button);
         foodImageView = findViewById(R.id.food_image);
 
+        /// set the tag for the image view
+        /// to check if the image was changed from app:srcCompat="@drawable/image"
+        foodImageView.setTag(R.drawable.image);
+
         /// set the on click listeners
+        foodImageView.setOnClickListener(this);
         addFoodButton.setOnClickListener(this);
-        selectImageButton.setOnClickListener(this);
-        captureImageButton.setOnClickListener(this);
 
         /// register the activity result launcher for selecting image from gallery
         selectImageLauncher = registerForActivityResult(
@@ -80,6 +85,8 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri selectedImage = result.getData().getData();
                         foodImageView.setImageURI(selectedImage);
+                        /// set the tag for the image view to null
+                        foodImageView.setTag(null);
                     }
                 });
 
@@ -90,6 +97,8 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Bitmap bitmap = (Bitmap) result.getData().getExtras().get("data");
                         foodImageView.setImageBitmap(bitmap);
+                        /// set the tag for the image view to null
+                        foodImageView.setTag(null);
                     }
                 });
 
@@ -102,18 +111,35 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
             addFoodToDatabase();
             return;
         }
-        if (v.getId() == selectImageButton.getId()) {
-            // select image from gallery
+        if (v.getId() == foodImageView.getId()) {
             Log.d(TAG, "Select image button clicked");
-            selectImageFromGallery();
+            showImageSourceDialog();
             return;
         }
-        if (v.getId() == captureImageButton.getId()) {
-            // capture image from camera
-            Log.d(TAG, "Capture image button clicked");
-            captureImageFromCamera();
-            return;
-        }
+    }
+
+    /// show the dialog to select the image source
+    /// gallery or camera
+    /// @see AlertDialog
+    private void showImageSourceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Image Source");
+
+        final ArrayList<Map.Entry<String, Integer>> options = new ArrayList<>();
+        options.add(Map.entry("Gallery", R.drawable.gallery_thumbnail));
+        options.add(Map.entry("Camera", R.drawable.photo_camera));
+
+        ImageSourceAdapter adapter = new ImageSourceAdapter(this, options);
+
+        builder.setAdapter(adapter, (DialogInterface dialog, int index) -> {
+            if (index == 0) {
+                selectImageFromGallery();
+            } else if (index == 1) {
+                captureImageFromCamera();
+            }
+        });
+
+        builder.show();
     }
 
     /// add the food to the database
@@ -122,12 +148,13 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
         /// get the values from the input fields
         String name = foodNameEditText.getText().toString();
         String priceText = foodPriceEditText.getText().toString();
-        String imageBase64 = ImageUtil.convertTo64Base(foodImageView);
+
 
         /// validate the input
         /// stop if the input is not valid
-        if (!isValid(name, priceText, imageBase64)) return;
+        if (!isValid(name, priceText, foodImageView)) return;
 
+        String imageBase64 = ImageUtil.convertTo64Base(foodImageView);
         /// convert the price to double
         double price = Double.parseDouble(priceText);
 
@@ -138,7 +165,7 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
         Log.d(TAG, "ID: " + id);
         Log.d(TAG, "Name: " + name);
         Log.d(TAG, "Price: " + price);
-        Log.d(TAG, "Image: " + imageBase64);
+//        Log.d(TAG, "Image: " + imageBase64);
 
         /// create a new food object
         Food food = new Food(id, name, price, imageBase64);
@@ -179,7 +206,7 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
 
 
     /// validate the input
-    private boolean isValid(String name, String priceText, String imageBase64) {
+    private boolean isValid(String name, String priceText, ImageView foodImageView) {
         if (name.isEmpty()) {
             Log.e(TAG, "Name is empty");
             foodNameEditText.setError("Name is required");
@@ -194,12 +221,12 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
             return false;
         }
 
-        if (imageBase64 == null) {
+        // check if foodImageView was changed from app:srcCompat="@drawable/image"
+        if (foodImageView.getTag() != null) {
             Log.e(TAG, "Image is required");
             Toast.makeText(this, "Image is required", Toast.LENGTH_SHORT).show();
             return false;
         }
-
         return true;
     }
 
