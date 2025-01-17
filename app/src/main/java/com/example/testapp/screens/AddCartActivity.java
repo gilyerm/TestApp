@@ -20,6 +20,7 @@ import com.example.testapp.adapters.FoodSpinnerAdapter;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
+import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
     private List<Food> selectedFoods;
 
     private DatabaseService databaseService;
+    private AuthenticationService authenticationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
 
         /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
+        authenticationService = AuthenticationService.getInstance();
 
         /// get the views
         addButton = findViewById(R.id.btn_add_cart);
@@ -115,15 +118,11 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
             return;
         }
         if (v.getId() == createCartButton.getId()) {
-            /// create a new cart
-            Cart cart = new Cart();
             /// generate a new id for the new cart
             String cartId = databaseService.generateCartId();
-            /// set the id of the cart
-            cart.setId(cartId);
-            /// add all the selected foods to the cart
-            cart.addFoods(selectedFoods);
-
+            String userId = authenticationService.getCurrentUserId();
+            /// create a new cart
+            Cart cart = new Cart(cartId, selectedFoods, userId);
             /// save the cart to the database and get the result in the callback
             databaseService.createNewCart(cart, new DatabaseService.DatabaseCallback<>() {
                 @Override

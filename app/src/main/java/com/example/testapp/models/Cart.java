@@ -1,24 +1,27 @@
 package com.example.testapp.models;
 
-import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Cart {
 
     /// unique id of the cart
     private String id;
 
-    private final ArrayList<Food> foods;
+    private final List<Food> foods;
+
+    /// the user ID of the cart owner
+    private String uid;
 
     public Cart() {
         foods = new ArrayList<>();
     }
 
-    public Cart(String id) {
+    public Cart(String id, List<Food> foods, String uid) {
+        this.foods = foods;
         this.id = id;
-        foods = new ArrayList<>();
+        this.uid = uid;
     }
 
     public String getId() {
@@ -55,7 +58,7 @@ public class Cart {
         return foods.get(index);
     }
 
-    public ArrayList<Food> getFoods() {
+    public List<Food> getFoods() {
         return foods;
     }
 
@@ -71,13 +74,34 @@ public class Cart {
         foods.clear();
     }
 
-    @NonNull
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     @Override
     public String toString() {
         return "Cart{" +
                 "id='" + id + '\'' +
                 ", foods=" + foods +
+                ", uid='" + uid + '\'' +
                 '}';
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+
+        Cart cart = (Cart) object;
+        return Objects.equals(id, cart.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }
