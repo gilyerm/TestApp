@@ -1,13 +1,18 @@
 package com.example.testapp.models;
 
+import androidx.annotation.NonNull;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Cart {
+public class Cart implements Serializable {
 
     /// unique id of the cart
     private String id;
+
+    private String title;
 
     private final List<Food> foods;
 
@@ -18,9 +23,10 @@ public class Cart {
         foods = new ArrayList<>();
     }
 
-    public Cart(String id, List<Food> foods, String uid) {
-        this.foods = foods;
+    public Cart(String id, String title, List<Food> foods, String uid) {
         this.id = id;
+        this.title = title;
+        this.foods = foods;
         this.uid = uid;
     }
 
@@ -30,6 +36,14 @@ public class Cart {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void addFood(Food food) {
@@ -82,10 +96,12 @@ public class Cart {
         this.uid = uid;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Cart{" +
                 "id='" + id + '\'' +
+                ", title='" + title + '\'' +
                 ", foods=" + foods +
                 ", uid='" + uid + '\'' +
                 '}';

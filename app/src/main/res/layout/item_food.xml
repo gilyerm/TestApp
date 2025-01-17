@@ -21,4 +21,11 @@
         android:text="Food Name"
         android:paddingStart="16dp"
         tools:text="@tools:sample/last_names" />
+
+    <TextView
+        android:id="@+id/food_quantity_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        tools:text="Quantity: 1" />
 </LinearLayout>

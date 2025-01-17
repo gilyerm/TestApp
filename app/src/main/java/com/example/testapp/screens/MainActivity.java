@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
     private AuthenticationService authenticationService;
-    private Button btnLogout, btnAddFood, btnAddCart, btnToAdmin, btnUserProfile;
+    private Button btnLogout, btnAddFood, btnAddCart, btnToAdmin, btnUserProfile, btnMyCarts;
 
     /// the current user instance
     /// NOTE:
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnLogout = findViewById(R.id.btn_main_logout);
         btnAddFood = findViewById(R.id.btn_main_add_food);
         btnAddCart = findViewById(R.id.btn_main_add_cart);
+        btnMyCarts = findViewById(R.id.btn_main_my_carts);
         btnToAdmin = findViewById(R.id.btn_main_to_admin);
         btnUserProfile = findViewById(R.id.btn_main_edit_profile);
 
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnLogout.setOnClickListener(this);
         btnAddFood.setOnClickListener(this);
         btnAddCart.setOnClickListener(this);
+        btnMyCarts.setOnClickListener(this);
         btnToAdmin.setOnClickListener(this);
         btnUserProfile.setOnClickListener(this);
 
@@ -104,6 +106,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Add cart button clicked");
             Intent addCartIntent = new Intent(MainActivity.this, AddCartActivity.class);
             startActivity(addCartIntent);
+            return;
+        }
+        if (v.getId() == btnMyCarts.getId()) {
+            Log.d(TAG, "My carts button clicked");
+            Intent myCartsIntent = new Intent(MainActivity.this, MyCartsActivity.class);
+            startActivity(myCartsIntent);
             return;
         }
         if (v.getId() == btnToAdmin.getId()) {

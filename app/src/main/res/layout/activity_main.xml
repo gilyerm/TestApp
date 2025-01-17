@@ -51,6 +51,12 @@
             android:text="Add Cart" />
 
         <Button
+            android:id="@+id/btn_main_my_carts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="My Carts" />
+
+        <Button
             android:id="@+id/btn_main_to_admin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

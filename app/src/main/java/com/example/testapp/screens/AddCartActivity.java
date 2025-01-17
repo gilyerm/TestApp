@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -33,10 +34,9 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
 
     private Spinner foodSpinner;
     private Button addButton, createCartButton;
+    private EditText etCartName;
     private FoodSpinnerAdapter foodSpinnerAdapter;
     private FoodsAdapter foodsAdapter;
-    private List<Food> selectedFoods;
-
     private DatabaseService databaseService;
     private AuthenticationService authenticationService;
 
@@ -59,13 +59,13 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
         /// get the views
         addButton = findViewById(R.id.btn_add_cart);
         createCartButton = findViewById(R.id.btn_create_add_cart);
+        etCartName = findViewById(R.id.edit_text_cart_name);
 
         /// Adapter for the food recycler view
         /// @see ArrayAdapter
         /// @see Food
         RecyclerView selectedFoodsRecyclerView = findViewById(R.id.recycler_view_selected_foods);
-        selectedFoods = new ArrayList<>();
-        foodsAdapter = new FoodsAdapter(selectedFoods);
+        foodsAdapter = new FoodsAdapter();
         selectedFoodsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         selectedFoodsRecyclerView.setAdapter(foodsAdapter);
 
@@ -105,49 +105,73 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View v) {
         if (v.getId() == addButton.getId()) {
-            /// get the selected food from the spinner
-            Food selectedFood = (Food) foodSpinner.getSelectedItem();
-            if (selectedFood == null) return;
-            /// add the selected food to the list of selected foods
-            selectedFoods.add(selectedFood);
-            /// notify the adapter that the data has changed
-            /// this specifies that the item at selectedFoods.size() - 1 has been inserted
-            /// and the adapter should update the view
-            /// @see FoodsAdapter#notifyItemInserted(int)
-            foodsAdapter.notifyItemInserted(selectedFoods.size() - 1);
+            addFoodToCart();
             return;
         }
         if (v.getId() == createCartButton.getId()) {
-            /// generate a new id for the new cart
-            String cartId = databaseService.generateCartId();
-            String userId = authenticationService.getCurrentUserId();
-            /// create a new cart
-            Cart cart = new Cart(cartId, selectedFoods, userId);
-            /// save the cart to the database and get the result in the callback
-            databaseService.createNewCart(cart, new DatabaseService.DatabaseCallback<>() {
-                @Override
-                public void onCompleted(Void object) {
-                    Log.d(TAG, "Cart created successfully");
-                    /// clear the selected foods
-                    int itemCount = selectedFoods.size();
-                    selectedFoods.clear();
-                    /// notify the adapter that the data has changed
-                    /// this specifies that the items from 0 to itemCount have been removed
-                    /// and the adapter should update the view
-                    /// @see FoodsAdapter#notifyItemRangeRemoved(int, int)
-                    /// @see itemCount
-                    foodsAdapter.notifyItemRangeRemoved(0, itemCount);
-                    Toast.makeText(AddCartActivity.this, "Cart created successfully", Toast.LENGTH_SHORT).show();
-                }
+            addCartToDatabase();
+            return;
+        }
+    }
 
-                @Override
-                public void onFailed(Exception e) {
-                    Log.e(TAG, "Failed to create cart", e);
-                    Toast.makeText(AddCartActivity.this, "Failed to create cart", Toast.LENGTH_SHORT).show();
-                }
-            });
+    private void addFoodToCart() {
+        /// get the selected food from the spinner
+        Food selectedFood = (Food) foodSpinner.getSelectedItem();
+        if (selectedFood == null) return;
+        /// add the selected food to the list of selected foods
+        foodsAdapter.addFood(selectedFood);
+    }
 
+    private void addCartToDatabase() {
+        String cartName = etCartName.getText().toString().trim();
+        List<Food> selectedFoods = foodsAdapter.getFoods();
+        if (!isValid(cartName, selectedFoods)) {
+            return;
         }
 
+        /// generate a new id for the new cart
+        String cartId = databaseService.generateCartId();
+        String userId = authenticationService.getCurrentUserId();
+        /// create a new cart
+        Cart cart = new Cart(cartId, cartName,  selectedFoods, userId);
+        /// save the cart to the database and get the result in the callback
+        databaseService.createNewCart(cart, new DatabaseService.DatabaseCallback<>() {
+            @Override
+            public void onCompleted(Void object) {
+                Log.d(TAG, "Cart created successfully");
+                /// clear the selected foods
+                int itemCount = selectedFoods.size();
+                selectedFoods.clear();
+                etCartName.setText("");
+                /// notify the adapter that the data has changed
+                /// this specifies that the items from 0 to itemCount have been removed
+                /// and the adapter should update the view
+                /// @see FoodsAdapter#notifyItemRangeRemoved(int, int)
+                /// @see itemCount
+                foodsAdapter.notifyItemRangeRemoved(0, itemCount);
+                Toast.makeText(AddCartActivity.this, "Cart created successfully", Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "Failed to create cart", e);
+                Toast.makeText(AddCartActivity.this, "Failed to create cart", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private boolean isValid(String cartName, List<Food> selectedFoods) {
+        if (cartName.isEmpty()) {
+            etCartName.setError("Cart name cannot be empty");
+            etCartName.requestFocus();
+            return false;
+        }
+        if (selectedFoods.isEmpty()) {
+            Toast.makeText(this, "Please add some food to the cart", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

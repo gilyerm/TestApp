@@ -10,21 +10,31 @@
     <Spinner
         android:id="@+id/spinner_food_add_cart"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_add_cart"
         app:layout_constraintEnd_toStartOf="@+id/btn_add_cart"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/btn_add_cart" />
 
     <Button
         android:id="@+id/btn_add_cart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:text="+"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edit_text_cart_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="Enter cart name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_cart" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_selected_foods"
@@ -34,8 +44,8 @@
         app:layout_constraintBottom_toTopOf="@+id/btn_create_add_cart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_add_cart"
-        tools:listitem="@layout/item_selected_food" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_cart_name"
+        tools:listitem="@layout/item_food" />
 
     <Button
         android:id="@+id/btn_create_add_cart"

@@ -9,11 +9,14 @@ import com.example.testapp.models.Food;
 import com.example.testapp.models.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /// a service to interact with the Firebase Realtime Database.
@@ -32,10 +35,10 @@ public class DatabaseService {
     /// @see DatabaseCallback#onFailed(Exception)
     public interface DatabaseCallback<T> {
         /// called when the operation is completed successfully
-        void onCompleted(T object);
+        public void onCompleted(T object);
 
         /// called when the operation fails with an exception
-        void onFailed(Exception e);
+        public void onFailed(Exception e);
     }
 
     /// the instance of this class
@@ -71,7 +74,6 @@ public class DatabaseService {
     /// @param path the path to write the data to
     /// @param data the data to write (can be any object, but must be serializable, i.e. must have a default constructor and all fields must have getters and setters)
     /// @param callback the callback to call when the operation is completed
-    /// @return void
     /// @see DatabaseCallback
     private void writeData(@NotNull final String path, @NotNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
         databaseReference.child(path).setValue(data).addOnCompleteListener(task -> {
@@ -88,7 +90,6 @@ public class DatabaseService {
     /// remove data from the database at a specific path
     /// @param path the path to remove the data from
     /// @param callback the callback to call when the operation is completed
-    /// @return void
     /// @see DatabaseCallback
     private void deleteData(@NotNull final String path, @Nullable final DatabaseCallback<Void> callback) {
         databaseReference.child(path).removeValue().addOnCompleteListener(task -> {
@@ -116,7 +117,6 @@ public class DatabaseService {
     /// @param path the path to get the data from
     /// @param clazz the class of the object to return
     /// @param callback the callback to call when the operation is completed
-    /// @return void
     /// @see DatabaseCallback
     /// @see Class
     private <T> void getData(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<T> callback) {
@@ -135,8 +135,14 @@ public class DatabaseService {
     /// @param path the path to get the data from
     /// @param clazz the class of the objects to return
     /// @param callback the callback to call when the operation is completed
-    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<List<T>> callback) {
-        readData(path).get().addOnCompleteListener(task -> {
+    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull Map<String, String> filter, @NotNull final DatabaseCallback<List<T>> callback) {
+        Query dbRef = readData(path);
+
+        for (Map.Entry<String, String> entry : filter.entrySet()) {
+            dbRef = dbRef.orderByChild(entry.getKey()).equalTo(entry.getValue());
+        }
+
+        dbRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
@@ -174,7 +180,6 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///              the callback will receive void
     ///            if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see User
     public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
@@ -186,7 +191,6 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///               the callback will receive the user object
     ///             if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see User
     public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
@@ -202,7 +206,6 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///              the callback will receive void
     ///             if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see Food
     public void createNewFood(@NotNull final Food food, @Nullable final DatabaseCallback<Void> callback) {
@@ -214,7 +217,6 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///               the callback will receive the food object
     ///              if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see Food
     public void getFood(@NotNull final String foodId, @NotNull final DatabaseCallback<Food> callback) {
@@ -225,12 +227,11 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///              the callback will receive a list of food objects
     ///            if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see List
     /// @see Food
     public void getFoodList(@NotNull final DatabaseCallback<List<Food>> callback) {
-        getDataList("foods", Food.class, callback);
+        getDataList("foods", Food.class, new HashMap<>(), callback);
     }
 
     /// generate a new id for a new food in the database
@@ -257,7 +258,6 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///               the callback will receive void
     ///              if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see Cart
     public void createNewCart(@NotNull final Cart cart, @Nullable final DatabaseCallback<Void> callback) {
@@ -269,12 +269,38 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     ///                the callback will receive the cart object
     ///               if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see DatabaseCallback
     /// @see Cart
     public void getCart(@NotNull final String cartId, @NotNull final DatabaseCallback<Cart> callback) {
         getData("carts/" + cartId, Cart.class, callback);
     }
+
+    /// get all the carts from the database
+    /// @param callback the callback to call when the operation is completed
+    ///               the callback will receive a list of cart objects
+    ///
+    public void getCartList(@NotNull final DatabaseCallback<List<Cart>> callback) {
+        getDataList("carts", Cart.class, new HashMap<>(), callback);
+    }
+
+    /// get all the carts of a specific user from the database
+    /// NOTE!!!
+    /// NEED TO *ADD* TO EXISTING RULES IN REALTIME DATABASE FIREBASE:
+    /// {
+    ///   "rules": {
+    ///     "carts": {
+    ///       ".indexOn": ["uid"]
+    ///     }
+    ///   }
+    /// }
+    /// @param uid the id of the user to get the carts for
+    /// @param callback the callback to call when the operation is completed
+    public void getUserCartList(@NotNull String uid, @NotNull final DatabaseCallback<List<Cart>> callback) {
+        Map<String, String> filter = new HashMap<>();
+        filter.put("uid", uid);
+        getDataList("carts", Cart.class, filter, callback);
+    }
+
 
     /// generate a new id for a new cart in the database
     /// @return a new id for the cart

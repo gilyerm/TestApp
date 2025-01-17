@@ -19,7 +19,7 @@ import java.util.List;
 /// Adapter for the food spinner
 /// @see ArrayAdapter
 /// @see Food
-/// @see R.layout#item_selected_food
+/// @see R.layout#item_food
 public class FoodSpinnerAdapter extends ArrayAdapter<Food> {
 
     /// inflater for the layout
@@ -76,8 +76,8 @@ public class FoodSpinnerAdapter extends ArrayAdapter<Food> {
     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         /// inflate the item_selected_food layout
         if (convertView == null) {
-            /// @see R.layout#item_selected_food
-            convertView = inflater.inflate(R.layout.item_selected_food, parent, false);
+            /// @see R.layout#item_food
+            convertView = inflater.inflate(R.layout.item_food, parent, false);
         }
         /// get the food at the position
         Food food = getItem(position);
