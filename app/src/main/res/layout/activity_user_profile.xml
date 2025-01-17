@@ -1,0 +1,125 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".screens.UserProfileActivity">
+
+    <TextView
+        android:id="@+id/tv_user_profile_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="User Profile"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_user_first_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="First Name:"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_user_profile_title" />
+
+    <EditText
+        android:id="@+id/et_user_first_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Enter your first name"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_first_name_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_user_first_name_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_user_first_name_label" />
+
+    <TextView
+        android:id="@+id/tv_user_last_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Last Name:"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tv_user_first_name_label"
+        app:layout_constraintTop_toBottomOf="@id/et_user_first_name" />
+
+    <EditText
+        android:id="@+id/et_user_last_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:hint="Enter your last name"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_last_name_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_user_last_name_label"
+        app:layout_constraintStart_toStartOf="@+id/et_user_first_name"
+        app:layout_constraintTop_toTopOf="@+id/tv_user_last_name_label" />
+
+    <TextView
+        android:id="@+id/tv_user_email_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Email:"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tv_user_last_name_label"
+        app:layout_constraintTop_toBottomOf="@id/et_user_last_name" />
+
+    <EditText
+        android:id="@+id/et_user_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:hint="Enter your email"
+        android:textSize="18sp"
+        android:enabled="false"
+        android:focusable="false"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_email_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_user_email_label"
+        app:layout_constraintStart_toStartOf="@+id/et_user_last_name"
+        app:layout_constraintTop_toTopOf="@+id/tv_user_email_label" />
+
+    <TextView
+        android:id="@+id/tv_user_phone_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Phone:"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/tv_user_email_label"
+        app:layout_constraintTop_toBottomOf="@id/et_user_email" />
+
+    <EditText
+        android:id="@+id/et_user_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:hint="Enter your phone number"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_user_phone_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tv_user_phone_label"
+        app:layout_constraintStart_toStartOf="@+id/et_user_email"
+        app:layout_constraintTop_toTopOf="@+id/tv_user_phone_label" />
+
+    <Button
+        android:id="@+id/btn_edit_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Edit Profile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/et_user_phone" />
+</androidx.constraintlayout.widget.ConstraintLayout>

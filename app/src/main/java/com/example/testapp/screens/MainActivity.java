@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
     private AuthenticationService authenticationService;
-    private Button btnLogout, btnAddFood, btnAddCart, btnToAdmin;
+    private Button btnLogout, btnAddFood, btnAddCart, btnToAdmin, btnUserProfile;
 
     /// the current user instance
     /// NOTE:
@@ -63,12 +63,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnAddFood = findViewById(R.id.btn_main_add_food);
         btnAddCart = findViewById(R.id.btn_main_add_cart);
         btnToAdmin = findViewById(R.id.btn_main_to_admin);
+        btnUserProfile = findViewById(R.id.btn_main_edit_profile);
+
 
         /// set the click listeners
         btnLogout.setOnClickListener(this);
         btnAddFood.setOnClickListener(this);
         btnAddCart.setOnClickListener(this);
         btnToAdmin.setOnClickListener(this);
+        btnUserProfile.setOnClickListener(this);
 
         if (user.isAdmin()) {
             btnToAdmin.setVisibility(View.VISIBLE);
@@ -108,6 +111,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
             startActivity(adminIntent);
             return;
+        }
+        if (v.getId() == btnUserProfile.getId()) {
+            Log.d(TAG, "Edit profile button clicked");
+            Intent userProfileIntent = new Intent(MainActivity.this, UserProfileActivity.class);
+            startActivity(userProfileIntent);
         }
     }
 }

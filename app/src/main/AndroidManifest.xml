@@ -21,6 +21,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TestApp">
         <activity
+            android:name=".screens.UserProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.AdminActivity"
             android:exported="false" />
         <activity

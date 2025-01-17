@@ -57,6 +57,12 @@
             android:text="To Admin Page"
             android:visibility="gone" />
 
+        <Button
+            android:id="@+id/btn_main_edit_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edit Profile" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
