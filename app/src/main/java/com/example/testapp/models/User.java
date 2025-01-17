@@ -13,22 +13,22 @@ public class User implements Serializable {
     /// unique id of the user
     private String uid;
 
-    private String email;
-    private String password;
-    private String fName;
-    private String lName;
+    private String email, password;
+    private String firstName, LastName;
     private String phone;
+    private boolean isAdmin;
 
     public User() {
     }
 
-    public User(String uid, String email, String password, String fName, String lName, String phone) {
+    public User(String uid, String email, String password, String firstName, String lastName, String phone, boolean isAdmin) {
         this.uid = uid;
         this.email = email;
         this.password = password;
-        this.fName = fName;
-        this.lName = lName;
+        this.firstName = firstName;
+        LastName = lastName;
         this.phone = phone;
+        this.isAdmin = isAdmin;
     }
 
     public String getUid() {
@@ -55,20 +55,20 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getFName() {
-        return fName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFName(String fName) {
-        this.fName = fName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLName() {
-        return lName;
+    public String getLastName() {
+        return LastName;
     }
 
-    public void setLName(String lName) {
-        this.lName = lName;
+    public void setLastName(String lastName) {
+        LastName = lastName;
     }
 
     public String getPhone() {
@@ -79,16 +79,38 @@ public class User implements Serializable {
         this.phone = phone;
     }
 
-    @NotNull
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "uid='" + uid + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", fName='" + fName + '\'' +
-                ", lName='" + lName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", LastName='" + LastName + '\'' +
                 ", phone='" + phone + '\'' +
+                ", isAdmin=" + isAdmin +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+
+        User user = (User) object;
+        return uid.equals(user.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
     }
 }

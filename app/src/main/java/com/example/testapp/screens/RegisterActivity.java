@@ -113,9 +113,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
 
         if (!Validator.isPasswordValid(password)) {
-            Log.e(TAG, "checkInput: Password must be at least 8 characters long");
+            Log.e(TAG, "checkInput: Password must be at least 6 characters long");
             /// show error message to user
-            etPassword.setError("Password must be at least 8 characters long");
+            etPassword.setError("Password must be at least 6 characters long");
             /// set focus to password field
             etPassword.requestFocus();
             return false;
@@ -163,13 +163,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             public void onCompleted(String uid) {
                 Log.d(TAG, "onCompleted: User registered successfully");
                 /// create a new user object
-                User user = new User();
-                user.setUid(uid);
-                user.setEmail(email);
-                user.setPassword(password);
-                user.setFName(fName);
-                user.setLName(lName);
-                user.setPhone(phone);
+                User user = new User(uid, email, password, fName,lName, phone, false);
 
                 /// call the createNewUser method of the database service
                 databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {

@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
+import com.example.testapp.models.User;
 import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 
@@ -22,7 +23,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
     private AuthenticationService authenticationService;
-    private Button btnLogout, btnAddFood, btnAddCart;
+    private Button btnLogout, btnAddFood, btnAddCart, btnToAdmin;
+
+    /// the current user instance
+    /// NOTE:
+    /// THIS IS THE INSTANCE WHEN THE USER LOGS IN
+    /// THIS IS NOT THE REALTIME USER INSTANCE
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,15 +54,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             finish();
         }
 
+        /// get the user data from shared preferences
+        user = SharedPreferencesUtil.getUser(MainActivity.this);
+        Log.d(TAG, "User: " + user);
+
         /// get the views
         btnLogout = findViewById(R.id.btn_main_logout);
         btnAddFood = findViewById(R.id.btn_main_add_food);
         btnAddCart = findViewById(R.id.btn_main_add_cart);
+        btnToAdmin = findViewById(R.id.btn_main_to_admin);
 
         /// set the click listeners
         btnLogout.setOnClickListener(this);
         btnAddFood.setOnClickListener(this);
         btnAddCart.setOnClickListener(this);
+        btnToAdmin.setOnClickListener(this);
+
+        if (user.isAdmin()) {
+            btnToAdmin.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -84,6 +101,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Add cart button clicked");
             Intent addCartIntent = new Intent(MainActivity.this, AddCartActivity.class);
             startActivity(addCartIntent);
+            return;
+        }
+        if (v.getId() == btnToAdmin.getId()) {
+            Log.d(TAG, "To admin button clicked");
+            Intent adminIntent = new Intent(MainActivity.this, AdminActivity.class);
+            startActivity(adminIntent);
             return;
         }
     }
