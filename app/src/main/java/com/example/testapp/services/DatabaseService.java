@@ -85,6 +85,23 @@ public class DatabaseService {
         });
     }
 
+    /// remove data from the database at a specific path
+    /// @param path the path to remove the data from
+    /// @param callback the callback to call when the operation is completed
+    /// @return void
+    /// @see DatabaseCallback
+    private void deleteData(@NotNull final String path, @Nullable final DatabaseCallback<Void> callback) {
+        databaseReference.child(path).removeValue().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (callback == null) return;
+                callback.onCompleted(null);
+            } else {
+                if (callback == null) return;
+                callback.onFailed(task.getException());
+            }
+        });
+    }
+
     /// read data from the database at a specific path
     /// @param path the path to read the data from
     /// @return a DatabaseReference object to read the data from
@@ -114,6 +131,27 @@ public class DatabaseService {
         });
     }
 
+    /// get a list of data from the database at a specific path
+    /// @param path the path to get the data from
+    /// @param clazz the class of the objects to return
+    /// @param callback the callback to call when the operation is completed
+    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<List<T>> callback) {
+        readData(path).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error getting data", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            List<T> tList = new ArrayList<>();
+            task.getResult().getChildren().forEach(dataSnapshot -> {
+                T t = dataSnapshot.getValue(clazz);
+                tList.add(t);
+            });
+
+            callback.onCompleted(tList);
+        });
+    }
+
     /// generate a new id for a new object in the database
     /// @param path the path to generate the id for
     /// @return a new id for the object
@@ -128,6 +166,9 @@ public class DatabaseService {
 
     // public methods to interact with the database
 
+
+    // start user section
+
     /// create a new user in the database
     /// @param user the user object to create
     /// @param callback the callback to call when the operation is completed
@@ -140,31 +181,6 @@ public class DatabaseService {
         writeData("users/" + user.getUid(), user, callback);
     }
 
-    /// create a new food in the database
-    /// @param food the food object to create
-    /// @param callback the callback to call when the operation is completed
-    ///              the callback will receive void
-    ///             if the operation fails, the callback will receive an exception
-    /// @return void
-    /// @see DatabaseCallback
-    /// @see Food
-    public void createNewFood(@NotNull final Food food, @Nullable final DatabaseCallback<Void> callback) {
-        writeData("foods/" + food.getId(), food, callback);
-    }
-
-    /// create a new cart in the database
-    /// @param cart the cart object to create
-    /// @param callback the callback to call when the operation is completed
-    ///               the callback will receive void
-    ///              if the operation fails, the callback will receive an exception
-    /// @return void
-    /// @see DatabaseCallback
-    /// @see Cart
-    public void createNewCart(@NotNull final Cart cart, @Nullable final DatabaseCallback<Void> callback) {
-        writeData("carts/" + cart.getId(), cart, callback);
-    }
-
-
     /// get a user from the database
     /// @param uid the id of the user to get
     /// @param callback the callback to call when the operation is completed
@@ -175,6 +191,22 @@ public class DatabaseService {
     /// @see User
     public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
         getData("users/" + uid, User.class, callback);
+    }
+
+    // end user section
+
+    // start food section
+
+    /// create a new food in the database
+    /// @param food the food object to create
+    /// @param callback the callback to call when the operation is completed
+    ///              the callback will receive void
+    ///             if the operation fails, the callback will receive an exception
+    /// @return void
+    /// @see DatabaseCallback
+    /// @see Food
+    public void createNewFood(@NotNull final Food food, @Nullable final DatabaseCallback<Void> callback) {
+        writeData("foods/" + food.getId(), food, callback);
     }
 
     /// get a food from the database
@@ -189,6 +221,49 @@ public class DatabaseService {
         getData("foods/" + foodId, Food.class, callback);
     }
 
+    /// get all the foods from the database
+    /// @param callback the callback to call when the operation is completed
+    ///              the callback will receive a list of food objects
+    ///            if the operation fails, the callback will receive an exception
+    /// @return void
+    /// @see DatabaseCallback
+    /// @see List
+    /// @see Food
+    public void getFoodList(@NotNull final DatabaseCallback<List<Food>> callback) {
+        getDataList("foods", Food.class, callback);
+    }
+
+    /// generate a new id for a new food in the database
+    /// @return a new id for the food
+    /// @see #generateNewId(String)
+    /// @see Food
+    public String generateFoodId() {
+        return generateNewId("foods");
+    }
+
+    /// delete a food from the database
+    /// @param foodId the id of the food to delete
+    /// @param callback the callback to call when the operation is completed
+    public void deleteFood(@NotNull final String foodId, @Nullable final DatabaseCallback<Void> callback) {
+        deleteData("foods/" + foodId, callback);
+    }
+
+    // end food section
+
+    // start cart section
+
+    /// create a new cart in the database
+    /// @param cart the cart object to create
+    /// @param callback the callback to call when the operation is completed
+    ///               the callback will receive void
+    ///              if the operation fails, the callback will receive an exception
+    /// @return void
+    /// @see DatabaseCallback
+    /// @see Cart
+    public void createNewCart(@NotNull final Cart cart, @Nullable final DatabaseCallback<Void> callback) {
+        writeData("carts/" + cart.getId(), cart, callback);
+    }
+
     /// get a cart from the database
     /// @param cartId the id of the cart to get
     /// @param callback the callback to call when the operation is completed
@@ -201,14 +276,6 @@ public class DatabaseService {
         getData("carts/" + cartId, Cart.class, callback);
     }
 
-    /// generate a new id for a new food in the database
-    /// @return a new id for the food
-    /// @see #generateNewId(String)
-    /// @see Food
-    public String generateFoodId() {
-        return generateNewId("foods");
-    }
-
     /// generate a new id for a new cart in the database
     /// @return a new id for the cart
     /// @see #generateNewId(String)
@@ -217,31 +284,13 @@ public class DatabaseService {
         return generateNewId("carts");
     }
 
-    /// get all the foods from the database
+    /// delete a cart from the database
+    /// @param cartId the id of the cart to delete
     /// @param callback the callback to call when the operation is completed
-    ///              the callback will receive a list of food objects
-    ///            if the operation fails, the callback will receive an exception
-    /// @return void
-    /// @see DatabaseCallback
-    /// @see List
-    /// @see Food
-    /// @see #getData(String, Class, DatabaseCallback)
-    public void getFoods(@NotNull final DatabaseCallback<List<Food>> callback) {
-        readData("foods").get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
-                callback.onFailed(task.getException());
-                return;
-            }
-            List<Food> foods = new ArrayList<>();
-            task.getResult().getChildren().forEach(dataSnapshot -> {
-                Food food = dataSnapshot.getValue(Food.class);
-                Log.d(TAG, "Got food: " + food);
-                foods.add(food);
-            });
-
-            callback.onCompleted(foods);
-        });
+    public void deleteCart(@NotNull final String cartId, @Nullable final DatabaseCallback<Void> callback) {
+        deleteData("carts/" + cartId, callback);
     }
+
+    // end cart section
 
 }

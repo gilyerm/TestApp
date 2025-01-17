@@ -75,7 +75,7 @@ public class AddCartActivity extends AppCompatActivity implements View.OnClickLi
         foodSpinner.setAdapter(foodSpinnerAdapter);
 
         /// get all the foods from the database
-        databaseService.getFoods(new DatabaseService.DatabaseCallback<>() {
+        databaseService.getFoodList(new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Food> object) {
                 Log.d(TAG, "onCompleted: " + object);
