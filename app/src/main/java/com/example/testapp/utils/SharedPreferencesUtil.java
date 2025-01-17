@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.testapp.models.User;
+import com.google.gson.Gson;
 
 /// Utility class for shared preferences operations
 /// Contains methods for saving and retrieving data from shared preferences
@@ -94,6 +95,21 @@ public class SharedPreferencesUtil {
         return sharedPreferences.contains(key);
     }
 
+    private static <T> void saveObject(Context context, String key, T object) {
+        Gson gson = new Gson();
+        String json = gson.toJson(object);
+        saveString(context, key, json);
+    }
+
+    private static <T> T getObject(Context context, String key, Class<T> type) {
+        String json = getString(context, key, null);
+        if (json == null) {
+            return null;
+        }
+        Gson gson = new Gson();
+        return gson.fromJson(json, type);
+    }
+
     // Add more utility methods as needed
 
     /// Save a user object to shared preferences
@@ -101,15 +117,7 @@ public class SharedPreferencesUtil {
     /// @param user The user object to save
     /// @see User
     public static void saveUser(Context context, User user) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("uid", user.getUid());
-        editor.putString("email", user.getEmail());
-        editor.putString("password", user.getPassword());
-        editor.putString("fName", user.getFName());
-        editor.putString("lName", user.getLName());
-        editor.putString("phone", user.getPhone());
-        editor.apply();
+        saveObject(context, "user", user);
     }
 
     /// Get the user object from shared preferences
@@ -118,33 +126,13 @@ public class SharedPreferencesUtil {
     /// @see User
     /// @see #isUserLoggedIn(Context)
     public static User getUser(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        // check if user is logged in
-        if (!isUserLoggedIn(context)) {
-            return null;
-        }
-        String uid = sharedPreferences.getString("uid", "");
-        String email = sharedPreferences.getString("email", "");
-        String password = sharedPreferences.getString("password", "");
-        String fName = sharedPreferences.getString("fName", "");
-        String lName = sharedPreferences.getString("lName", "");
-        String phone = sharedPreferences.getString("phone", "");
-        return new User(uid, email, password, fName, lName, phone);
+        return getObject(context, "user", User.class);
     }
 
     /// Sign out the user by removing user data from shared preferences
     /// @param context The context to use
     public static void signOutUser(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove("uid");
-        editor.remove("email");
-        editor.remove("password");
-        editor.remove("fName");
-        editor.remove("lName");
-        editor.remove("phone");
-
-        editor.apply();
+        remove(context, "user");
     }
 
     /// Check if a user is logged in by checking if the user id is present in shared preferences
@@ -152,7 +140,7 @@ public class SharedPreferencesUtil {
     /// @return true if the user is logged in, false otherwise
     /// @see #contains(Context, String)
     public static boolean isUserLoggedIn(Context context) {
-        return contains(context, "uid");
+        return contains(context, "user");
     }
 
 

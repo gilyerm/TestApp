@@ -2,7 +2,13 @@ package com.example.testapp.models;
 
 import org.jetbrains.annotations.NotNull;
 
-public class User {
+import java.io.Serializable;
+
+/// Model class for the user
+/// This class represents a user in the application
+/// It contains the user's information
+/// @see Serializable
+public class User implements Serializable {
 
     /// unique id of the user
     private String uid;
