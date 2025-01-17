@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void loginUser(String email, String password) {
-        authenticationService.signIn(email, password, new AuthenticationService.AuthCallback<>() {
+        authenticationService.signIn(email, password, new AuthenticationService.AuthCallback() {
             /// Callback method called when the operation is completed
             /// @param uid the user ID of the user that is logged in
             @Override

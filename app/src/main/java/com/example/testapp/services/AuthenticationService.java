@@ -18,12 +18,12 @@ public class AuthenticationService {
     private static final String TAG = "AuthenticationService";
 
     /// callback interface for authentication operations
-    /// @param <T> the type of the object to return
     /// @see AuthCallback#onCompleted(Object)
     /// @see AuthCallback#onFailed(Exception)
-    public interface AuthCallback<T> {
+    public interface AuthCallback {
         /// called when the operation is completed successfully
-        void onCompleted(T object);
+        /// @param uid the user ID
+        void onCompleted(String uid);
 
         /// called when the operation fails with an exception
         void onFailed(Exception e);
@@ -58,9 +58,8 @@ public class AuthenticationService {
     /// @param callback the callback to call when the operation is completed
     ///              the callback will receive true if the operation is successful
     ///              if the operation fails, the callback will receive an exception
-    /// @return void
     /// @see AuthCallback
-    public void signIn(@NotNull final String email, @NotNull final String password, @NotNull final AuthCallback<String> callback) {
+    public void signIn(@NotNull final String email, @NotNull final String password, @NotNull final AuthCallback callback) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 callback.onCompleted(getCurrentUserId());
@@ -79,7 +78,7 @@ public class AuthenticationService {
     ///              if the operation fails, the callback will receive an exception
     /// @see AuthCallback
     /// @see FirebaseUser
-    public void signUp(@NotNull final String email, @NotNull final String password, @NotNull final AuthCallback<String> callback) {
+    public void signUp(@NotNull final String email, @NotNull final String password, @NotNull final AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 callback.onCompleted(getCurrentUserId());

@@ -157,7 +157,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         Log.d(TAG, "registerUser: Registering user...");
 
         /// call the sign up method of the authentication service
-        authenticationService.signUp(email, password, new AuthenticationService.AuthCallback<>() {
+        authenticationService.signUp(email, password, new AuthenticationService.AuthCallback() {
 
             @Override
             public void onCompleted(String uid) {
