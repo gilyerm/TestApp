@@ -1,7 +1,5 @@
 package com.example.testapp.models;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.Serializable;
 
 /// Model class for the user
@@ -14,7 +12,7 @@ public class User implements Serializable {
     private String uid;
 
     private String email, password;
-    private String firstName, LastName;
+    private String firstName, lastName;
     private String phone;
     private boolean isAdmin;
 
@@ -26,7 +24,7 @@ public class User implements Serializable {
         this.email = email;
         this.password = password;
         this.firstName = firstName;
-        LastName = lastName;
+        this.lastName = lastName;
         this.phone = phone;
         this.isAdmin = isAdmin;
     }
@@ -64,11 +62,11 @@ public class User implements Serializable {
     }
 
     public String getLastName() {
-        return LastName;
+        return lastName;
     }
 
     public void setLastName(String lastName) {
-        LastName = lastName;
+        this.lastName = lastName;
     }
 
     public String getPhone() {
@@ -94,7 +92,7 @@ public class User implements Serializable {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", LastName='" + LastName + '\'' +
+                ", LastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", isAdmin=" + isAdmin +
                 '}';

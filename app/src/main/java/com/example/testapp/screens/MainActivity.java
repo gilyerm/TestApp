@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnToAdmin.setOnClickListener(this);
         btnUserProfile.setOnClickListener(this);
 
-        if (user.isAdmin()) {
+        if (user != null && user.isAdmin()) {
             btnToAdmin.setVisibility(View.VISIBLE);
         }
     }

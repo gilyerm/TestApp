@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
 import com.example.testapp.models.User;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -76,15 +77,15 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     /// @see DatabaseCallback
     private void writeData(@NotNull final String path, @NotNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
-        databaseReference.child(path).setValue(data).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+        readData(path).setValue(data, (error, ref) -> {
+            if (error != null) {
                 if (callback == null) return;
-                callback.onCompleted(task.getResult());
+                callback.onFailed(error.toException());
             } else {
                 if (callback == null) return;
-                callback.onFailed(task.getException());
-            }
-        });
+                callback.onCompleted(null);
+        }
+    });
     }
 
     /// remove data from the database at a specific path
@@ -92,15 +93,15 @@ public class DatabaseService {
     /// @param callback the callback to call when the operation is completed
     /// @see DatabaseCallback
     private void deleteData(@NotNull final String path, @Nullable final DatabaseCallback<Void> callback) {
-        databaseReference.child(path).removeValue().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+        readData(path).removeValue((error, ref) -> {
+            if (error != null) {
                 if (callback == null) return;
-                callback.onCompleted(null);
+                callback.onFailed(error.toException());
             } else {
                 if (callback == null) return;
-                callback.onFailed(task.getException());
-            }
-        });
+                callback.onCompleted(null);
+        }
+    });
     }
 
     /// read data from the database at a specific path
@@ -195,6 +196,24 @@ public class DatabaseService {
     /// @see User
     public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
         getData("users/" + uid, User.class, callback);
+    }
+
+    /// get all the users from the database
+    /// @param callback the callback to call when the operation is completed
+    ///              the callback will receive a list of user objects
+    ///            if the operation fails, the callback will receive an exception
+    /// @see DatabaseCallback
+    /// @see List
+    /// @see User
+    public void getUserList(@NotNull final DatabaseCallback<List<User>> callback) {
+        getDataList("users", User.class, new HashMap<>(), callback);
+    }
+
+    /// delete a user from the database
+    /// @param user the user to delete
+    /// @param callback the callback to call when the operation is completed
+    public void deleteUser(@NotNull final String uid, @Nullable final DatabaseCallback<Void> callback) {
+        deleteData("users/" + uid, callback);
     }
 
     // end user section

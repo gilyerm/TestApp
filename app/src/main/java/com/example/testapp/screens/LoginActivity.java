@@ -103,7 +103,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
 
         if (!Validator.isPasswordValid(password)) {
-            Log.e(TAG, "checkInput: Password must be at least 6 characters long");
+            Log.e(TAG, "checkInput: Invalid password");
             /// show error message to user
             etPassword.setError("Password must be at least 6 characters long");
             /// set focus to password field

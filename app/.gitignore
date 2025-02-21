@@ -44,6 +44,7 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+src/main/res/raw/firebase_admin_sdk.json
 
 # Android Patch
 gen-external-apklibs
