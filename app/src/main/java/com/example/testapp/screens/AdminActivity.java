@@ -2,19 +2,18 @@ package com.example.testapp.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 
-public class AdminActivity extends AppCompatActivity {
+public class AdminActivity extends BaseActivity {
 
-    Button btnToUsers;
+    LinearLayout cardUsers, cardFoods, cardCarts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +26,22 @@ public class AdminActivity extends AppCompatActivity {
             return insets;
         });
 
-        btnToUsers = findViewById(R.id.btn_admin_to_users);
-        btnToUsers.setOnClickListener(v -> {
+        cardUsers = findViewById(R.id.card_users);
+        cardFoods = findViewById(R.id.card_foods);
+        cardCarts = findViewById(R.id.card_carts);
+
+        cardUsers.setOnClickListener(v -> {
             Intent intent = new Intent(this, UsersListActivity.class);
+            startActivity(intent);
+        });
+
+        cardFoods.setOnClickListener(v -> {
+            Intent intent = new Intent(this, FoodItemsActivity.class);
+            startActivity(intent);
+        });
+
+        cardCarts.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AllCartsActivity.class);
             startActivity(intent);
         });
     }

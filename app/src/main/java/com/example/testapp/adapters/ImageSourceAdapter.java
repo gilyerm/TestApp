@@ -12,20 +12,28 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.testapp.R;
+import com.example.testapp.models.ImageSourceOption;
 
 import java.util.List;
-import java.util.Map;
 
 /// Adapter for the image source dialog
-public class ImageSourceAdapter extends ArrayAdapter<Map.Entry<String, Integer>> {
+public class ImageSourceAdapter extends ArrayAdapter<ImageSourceOption> {
+
+
+    public interface OnImageSourceSelectedListener {
+        void onImageSourceSelected(ImageSourceOption option);
+    }
 
     private final LayoutInflater inflater;
-    private final List<Map.Entry<String, Integer>> objects;
+    private final List<ImageSourceOption> objects;
+    private OnImageSourceSelectedListener listener;
 
-    public ImageSourceAdapter(@NonNull Context context, @NonNull List<Map.Entry<String, Integer>> objects) {
+    public ImageSourceAdapter(@NonNull Context context, @NonNull List<ImageSourceOption> objects,
+                              @NonNull OnImageSourceSelectedListener listener) {
         super(context, R.layout.item_image_source, objects);
         this.inflater = LayoutInflater.from(context);
         this.objects = objects;
+        this.listener = listener;
     }
 
 
@@ -37,7 +45,7 @@ public class ImageSourceAdapter extends ArrayAdapter<Map.Entry<String, Integer>>
 
     @Nullable
     @Override
-    public Map.Entry<String, Integer> getItem(int position) {
+    public ImageSourceOption getItem(int position) {
         /// return the item at the position
         return objects.get(position);
     }
@@ -52,16 +60,25 @@ public class ImageSourceAdapter extends ArrayAdapter<Map.Entry<String, Integer>>
 
         /// get the views from the layout
         ImageView icon = convertView.findViewById(R.id.icon_dialog_item);
-        TextView text = convertView.findViewById(R.id.text_dialog_item);
+        TextView title = convertView.findViewById(R.id.text_dialog_item);
+        TextView description = convertView.findViewById(R.id.text_dialog_item_description);
 
         /// get the item at the position
-        Map.Entry<String, Integer> item = getItem(position);
+        ImageSourceOption item = getItem(position);
 
         if (item != null) {
             /// set the text and icon
-            text.setText(item.getKey());
-            icon.setImageResource(item.getValue());
+            title.setText(item.getTitle());
+            description.setText(item.getDescription());
+            icon.setImageResource(item.getIconResource());
         }
+
+        /// set the click listener for the item
+        convertView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onImageSourceSelected(item);
+            }
+        });
 
         return convertView;
     }

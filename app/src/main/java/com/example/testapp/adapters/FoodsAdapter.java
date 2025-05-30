@@ -102,6 +102,9 @@ public class FoodsAdapter extends RecyclerView.Adapter<FoodsAdapter.ViewHolder> 
         holder.foodNameTextView.setText(food.getName());
         holder.foodImageView.setImageBitmap(ImageUtil.convertFrom64base(food.getImageBase64()));
         holder.foodQuantityTextView.setText(String.valueOf(foodItemCountList.get(position).quantity));
+
+        holder.foodSinglePriceTextView.setText("Single Price: " + String.format("$%.2f", food.getPrice()));
+        holder.foodPriceTextView.setText(String.format("$%.2f", food.getPrice() * foodItemCountList.get(position).quantity));
     }
 
     /// get the number of items in the list
@@ -117,12 +120,18 @@ public class FoodsAdapter extends RecyclerView.Adapter<FoodsAdapter.ViewHolder> 
         public final TextView foodNameTextView;
         public final ImageView foodImageView;
         public final TextView foodQuantityTextView;
+        public final TextView foodSinglePriceTextView;
+        public final TextView foodPriceTextView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             foodNameTextView = itemView.findViewById(R.id.food_name_text_view);
             foodImageView = itemView.findViewById(R.id.food_image_view);
             foodQuantityTextView = itemView.findViewById(R.id.food_quantity_text_view);
+            foodSinglePriceTextView = itemView.findViewById(R.id.food_single_price_text_view);
+            foodPriceTextView = itemView.findViewById(R.id.food_price_text_view);
+
+            foodSinglePriceTextView.setVisibility(View.VISIBLE); // Show the single price
         }
     }
 }

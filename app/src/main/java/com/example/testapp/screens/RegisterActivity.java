@@ -6,10 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -26,14 +26,13 @@ import com.example.testapp.utils.Validator;
 /// It contains fields for the user to enter their information
 /// It also contains a button to register the user
 /// When the user is registered, they are redirected to the main activity
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
+public class RegisterActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "RegisterActivity";
 
     private EditText etEmail, etPassword, etFName, etLName, etPhone;
     private Button btnRegister;
-    private AuthenticationService authenticationService;
-    private DatabaseService databaseService;
+    private TextView tvLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +46,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return insets;
         });
 
-        /// get the instance of the authentication service
-        authenticationService = AuthenticationService.getInstance();
-        /// get the instance of the database service
-        databaseService = DatabaseService.getInstance();
-
         /// get the views
         etEmail = findViewById(R.id.et_register_email);
         etPassword = findViewById(R.id.et_register_password);
@@ -59,9 +53,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         etLName = findViewById(R.id.et_register_last_name);
         etPhone = findViewById(R.id.et_register_phone);
         btnRegister = findViewById(R.id.btn_register_register);
+        tvLogin = findViewById(R.id.tv_register_login);
 
         /// set the click listener
         btnRegister.setOnClickListener(this);
+        tvLogin.setOnClickListener(this);
     }
 
     @Override
@@ -95,6 +91,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
             /// Register user
             registerUser(email, password, fName, lName, phone);
+        } else if (v.getId() == tvLogin.getId()) {
+            /// Navigate back to Login Activity
+            finish();
         }
     }
 

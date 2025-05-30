@@ -14,16 +14,25 @@ import com.example.testapp.R;
 import com.example.testapp.models.Cart;
 import com.example.testapp.screens.CartDetailActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
+/// Adapter for the cart recycler view
+/// @see RecyclerView
+/// @see Cart
+/// @see R.layout#item_cart
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
-    private final List<Cart> cartList;
-    private Context context;
+    public interface CartClickListener {
+        void onCartClick(Cart cart);
+    }
 
-    public CartAdapter(List<Cart> cartList, Context context) {
-        this.cartList = cartList;
-        this.context = context;
+    private final List<Cart> cartList;
+    private final CartClickListener listener;
+
+    public CartAdapter(CartClickListener listener) {
+        this.cartList = new ArrayList<>();
+        this.listener = listener;
     }
 
     @NonNull
@@ -40,9 +49,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.cartDescription.setText("Total items: " + cart.getFoods().size());
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, CartDetailActivity.class);
-            intent.putExtra("cart_id", cart.getId());
-            context.startActivity(intent);
+            if (listener != null) {
+                listener.onCartClick(cart);
+            }
         });
     }
 
@@ -50,6 +59,36 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public int getItemCount() {
         return cartList.size();
     }
+
+
+    public List<Cart> getCartList() {
+        return cartList;
+    }
+
+    public void setCartList(List<Cart> carts) {
+        this.cartList.clear();
+        this.cartList.addAll(carts);
+        notifyDataSetChanged();
+    }
+
+    public void addCart(Cart cart) {
+        this.cartList.add(cart);
+        notifyItemInserted(cartList.size() - 1);
+    }
+
+    public void removeCart(int position) {
+        if (position < 0 || position >= cartList.size()) {
+            return;
+        }
+        cartList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void clearCarts() {
+        this.cartList.clear();
+        notifyDataSetChanged();
+    }
+
 
     static class CartViewHolder extends RecyclerView.ViewHolder {
         TextView cartName;

@@ -1,10 +1,12 @@
 package com.example.testapp.screens;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,14 +22,14 @@ import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 
-public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class UserProfileActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "UserProfileActivity";
 
     private EditText etUserFirstName, etUserLastName, etUserEmail, etUserPhone, etUserPassword;
-    private Button btnUpdateProfile;
-    private DatabaseService databaseService;
-    private AuthenticationService.Admin adminService;
+    private TextView tvUserDisplayName, tvUserDisplayEmail;
+    private Button btnUpdateProfile, btnSignOut;
+    private View adminBadge;
     String selectedUid;
     User selectedUser;
     boolean isCurrentUser = false;
@@ -43,8 +45,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             return insets;
         });
 
-        databaseService = DatabaseService.getInstance();
-        adminService = AuthenticationService.Admin.getInstance(this);
 
         selectedUid = getIntent().getStringExtra("USER_UID");
         User currentUser = SharedPreferencesUtil.getUser(this);
@@ -68,9 +68,19 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         etUserEmail = findViewById(R.id.et_user_email);
         etUserPhone = findViewById(R.id.et_user_phone);
         etUserPassword = findViewById(R.id.et_user_password);
+        tvUserDisplayName = findViewById(R.id.tv_user_display_name);
+        tvUserDisplayEmail = findViewById(R.id.tv_user_display_email);
         btnUpdateProfile = findViewById(R.id.btn_edit_profile);
+        btnSignOut = findViewById(R.id.btn_sign_out);
+        adminBadge = findViewById(R.id.admin_badge);
 
         btnUpdateProfile.setOnClickListener(this);
+        btnSignOut.setOnClickListener(this);
+
+        // if the user is not the current user, hide the sign out button
+        if (!isCurrentUser) {
+            btnSignOut.setVisibility(View.GONE);
+        }
 
         showUserProfile();
     }
@@ -81,10 +91,13 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             updateUserProfile();
             return;
         }
+        if(v.getId() == R.id.btn_sign_out) {
+            signOut();
+        }
     }
 
     private void showUserProfile() {
-        // Get the user data from shared preferences
+        // Get the user data from database
         databaseService.getUser(selectedUid, new DatabaseService.DatabaseCallback<User>() {
             @Override
             public void onCompleted(User user) {
@@ -95,7 +108,20 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 etUserEmail.setText(user.getEmail());
                 etUserPhone.setText(user.getPhone());
                 etUserPassword.setText(user.getPassword());
+                
+                // Update display fields
+                String displayName = user.getFirstName() + " " + user.getLastName();
+                tvUserDisplayName.setText(displayName);
+                tvUserDisplayEmail.setText(user.getEmail());
 
+                // Show/hide admin badge based on user's admin status
+                if (user.isAdmin()) {
+                    adminBadge.setVisibility(View.VISIBLE);
+                    Log.d(TAG, "User is admin, showing admin badge");
+                } else {
+                    adminBadge.setVisibility(View.GONE);
+                    Log.d(TAG, "User is not admin, hiding admin badge");
+                }
             }
 
             @Override
@@ -103,6 +129,16 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 Log.e(TAG, "Error getting user profile", e);
             }
         });
+
+        // disable the EditText fields if the user is not the current user
+        if (!isCurrentUser) {
+            etUserEmail.setEnabled(false);
+            etUserPassword.setEnabled(false);
+        } else {
+            etUserEmail.setEnabled(true);
+            etUserPassword.setEnabled(true);
+            btnUpdateProfile.setVisibility(View.VISIBLE);
+        }
     }
 
     private void updateUserProfile() {
@@ -132,33 +168,69 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         // Update the user data in the authentication
         Log.d(TAG, "Updating user profile");
-        adminService.updateUser(selectedUser, new AuthenticationService.AuthCallback() {
+        Log.d(TAG, "Selected user UID: " + selectedUser.getUid());
+        Log.d(TAG, "Is current user: " + isCurrentUser);
+        Log.d(TAG, "User email: " + selectedUser.getEmail());
+        Log.d(TAG, "User password: " + selectedUser.getPassword());
+
+
+
+        if (!isCurrentUser && !selectedUser.isAdmin()) {
+            Log.e(TAG, "Only the current user can update their profile");
+            Toast.makeText(this, "You can only update your own profile", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else if (isCurrentUser) {
+            updateUserInAuthenticationAndDatabase(selectedUser);
+        }
+        else if (selectedUser.isAdmin()) {
+            // update the user in the database
+            updateUserInDatabase(selectedUser);
+        }
+    }
+
+    private void updateUserInAuthenticationAndDatabase(User user) {
+        Log.d(TAG, "Updating user in authentication and database");
+        authenticationService.updateCurrentUserEmail(user.getEmail(), new AuthenticationService.AuthCallback() {
             @Override
             public void onCompleted(String uid) {
-                // Update the user data in the database
-                Log.d(TAG, "User profile updated in authentication");
-                Log.d(TAG, "Updating user profile in database");
-                databaseService.createNewUser(selectedUser, new DatabaseService.DatabaseCallback<>() {
+                Log.d(TAG, "User email updated successfully: " + uid);
+                authenticationService.updateCurrentUserPassword(user.getPassword(), new AuthenticationService.AuthCallback() {
                     @Override
-                    public void onCompleted(Void object) {
-                        Log.d(TAG, "Profile updated successfully");
-                        // Save the updated user data to shared preferences
-                        if (isCurrentUser)
-                            SharedPreferencesUtil.saveUser(getApplicationContext(), selectedUser);
-                        Toast.makeText(UserProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    public void onCompleted(String uid) {
+                        Log.d(TAG, "User password updated successfully: " + uid);
+                        updateUserInDatabase(user);
                     }
 
                     @Override
                     public void onFailed(Exception e) {
-                        Log.e(TAG, "Error updating profile", e);
-                        Toast.makeText(UserProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error updating user password", e);
+                        Toast.makeText(UserProfileActivity.this, "Failed to update password", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "Error updating profile", e);
+                Log.e(TAG, "Error updating user email", e);
+                Toast.makeText(UserProfileActivity.this, "Failed to update email", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateUserInDatabase(User user) {
+        Log.d(TAG, "Updating user in database: " + user.getUid());
+        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void result) {
+                Log.d(TAG, "User profile updated successfully");
+                Toast.makeText(UserProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                showUserProfile(); // Refresh the profile view
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "Error updating user profile", e);
                 Toast.makeText(UserProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
             }
         });
@@ -191,5 +263,16 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             return false;
         }
         return true;
+    }
+
+    private void signOut() {
+        Log.d(TAG, "Sign out button clicked");
+        authenticationService.signOut();
+        SharedPreferencesUtil.signOutUser(UserProfileActivity.this);
+
+        Log.d(TAG, "User signed out, redirecting to LandingActivity");
+        Intent landingIntent = new Intent(UserProfileActivity.this, LandingActivity.class);
+        landingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(landingIntent);
     }
 }

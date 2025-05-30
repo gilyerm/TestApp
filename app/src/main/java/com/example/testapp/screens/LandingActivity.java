@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -17,7 +16,7 @@ import com.example.testapp.R;
 /// Landing activity for the app
 /// This activity is the first activity that is shown when the app is first opened (when the user is not signed in)
 /// It contains buttons to navigate to the login and register activities
-public class LandingActivity extends AppCompatActivity implements View.OnClickListener {
+public class LandingActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "LandingActivity";
 

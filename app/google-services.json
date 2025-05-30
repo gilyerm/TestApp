@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "353367211409",
+    "project_id": "gilyerm-test-app",
+    "storage_bucket": "gilyerm-test-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353367211409:android:e5009b82ca730c973dee30",
+        "android_client_info": {
+          "package_name": "com.example.testapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-zgVbGsCbE-2uVvROSkpUwssQ7GWvvLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

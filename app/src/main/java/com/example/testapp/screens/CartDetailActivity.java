@@ -7,7 +7,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,11 +18,10 @@ import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Cart;
 import com.example.testapp.services.DatabaseService;
 
-public class CartDetailActivity extends AppCompatActivity {
+public class CartDetailActivity extends BaseActivity {
 
-    private DatabaseService databaseService;
     private TextView tvCartTitle;
-    private TextView tvCartDescription;
+    private TextView tvCartTotalAmount, tvCartTotalPrice;
     private RecyclerView rvCartItems;
     private ProgressBar progressBar;
 
@@ -39,10 +37,9 @@ public class CartDetailActivity extends AppCompatActivity {
             return insets;
         });
 
-        databaseService = DatabaseService.getInstance();
-
         tvCartTitle = findViewById(R.id.tv_cart_title);
-        tvCartDescription = findViewById(R.id.tv_cart_description);
+        tvCartTotalAmount = findViewById(R.id.tv_cart_total_items);
+        tvCartTotalPrice = findViewById(R.id.tv_cart_total_price);
         rvCartItems = findViewById(R.id.rv_cart_items);
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
         progressBar = findViewById(R.id.cart_detail_progress_bar);
@@ -77,7 +74,8 @@ public class CartDetailActivity extends AppCompatActivity {
 
     private void setCartView(Cart cart) {
         tvCartTitle.setText(cart.getTitle());
-        tvCartDescription.setText("Total items: " + cart.getFoods().size());
+        tvCartTotalAmount.setText(cart.getFoods().size() + "");
+        tvCartTotalPrice.setText(String.format("₪%.2f", cart.getTotalPrice()));
         FoodsAdapter foodsAdapter = new FoodsAdapter();
         foodsAdapter.addFoods(cart.getFoods());
         rvCartItems.setAdapter(foodsAdapter);

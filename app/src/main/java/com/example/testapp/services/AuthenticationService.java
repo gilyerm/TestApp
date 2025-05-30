@@ -1,21 +1,11 @@
 package com.example.testapp.services;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 
-import com.example.testapp.R;
-import com.example.testapp.models.User;
-import com.google.admin_firebase.auth.UserRecord;
-import com.google.api.core.ApiFuture;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 
 /// a service to interact with the Firebase Authentication.
@@ -37,92 +27,6 @@ public class AuthenticationService {
 
         /// called when the operation fails with an exception
         public void onFailed(Exception e);
-    }
-
-    public static class Admin {
-        com.google.admin_firebase.auth.FirebaseAuth adminAuth;
-        private static Admin instance;
-        private Admin(Context context) {
-            try {
-                /// for creating the firebase_admin_sdk.json file, follow the instructions here:
-                /// 1. Go to the Firebase Console
-                /// 2. Go to Project Settings
-                /// 3. Go to Service Accounts
-                /// 4. Click on Generate New Private Key
-                /// 5. Save the file as firebase_admin_sdk.json in the app/src/main/res/raw folder
-                    /// DON'T FORGET TO ADD THE FILE TO .gitignore file to avoid committing it to the repository
-                    /// add the following line to the .gitignore file:
-                    /// app/src/main/res/raw/firebase_admin_sdk.json
-                /// 6. Add the code to the your build.gradle file to create the library dependency for the Firebase Admin SDK
-                    /// NOTE: you need to have the Firebase Admin SDK in your project to use this code
-                    /// see `shadow` task in the build.gradle file to see how to include the Firebase Admin SDK in the build
-                InputStream serviceAccount =
-                    context.getResources().openRawResource(R.raw.firebase_admin_sdk);
-                com.google.admin_firebase.FirebaseOptions options = null;
-                options = new com.google.admin_firebase.FirebaseOptions.Builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setDatabaseUrl("https://gilyerm-test-app-default-rtdb.firebaseio.com")
-                        .build();
-                com.google.admin_firebase.FirebaseApp.initializeApp(options);
-                adminAuth = com.google.admin_firebase.auth.FirebaseAuth.getInstance();
-                Log.d(TAG, "Admin initialized");
-            } catch (Resources.NotFoundException e) {
-                Log.e(TAG, "Error getting resource", e);
-                throw new RuntimeException(e);
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public static Admin getInstance(Context context) {
-            if (instance == null) {
-                instance = new Admin(context);
-            }
-            return instance;
-        }
-
-        public void createUser(@NotNull final String email, @NotNull final String password, @NotNull final AuthCallback callback) {
-            UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest().setEmail(email).setPassword(password);
-            ApiFuture<UserRecord> userAsync = adminAuth.createUserAsync(createRequest);
-            userAsync.addListener(() -> {
-                try {
-                    UserRecord userRecord = userAsync.get();
-                    callback.onCompleted(userRecord.getUid());
-                } catch (Exception e) {
-                    callback.onFailed(e);
-                }
-            }, Runnable::run);
-        }
-
-        public void updateUser(@NotNull final String uid, @NotNull final String email, @NotNull final String password, @NotNull final AuthCallback callback) {
-            UserRecord.UpdateRequest updateRequest = new UserRecord.UpdateRequest(uid).setEmail(email).setPassword(password);
-            ApiFuture<UserRecord> userAsync = adminAuth.updateUserAsync(updateRequest);
-            userAsync.addListener(() -> {
-                try {
-                    UserRecord userRecord = userAsync.get();
-                    callback.onCompleted(userRecord.getUid());
-                } catch (Exception e) {
-                    callback.onFailed(e);
-                }
-            }, Runnable::run);
-        }
-
-        public void updateUser(@NotNull final User user, @NotNull final AuthCallback callback) {
-            updateUser(user.getUid(), user.getEmail(), user.getPassword(), callback);
-        }
-
-        public void deleteUser(@NotNull final String uid, @NotNull final AuthCallback callback) {
-            ApiFuture<Void> userAsync = adminAuth.deleteUserAsync(uid);
-            userAsync.addListener(() -> {
-                try {
-                    userAsync.get();
-                    callback.onCompleted(uid);
-                } catch (Exception e) {
-                    callback.onFailed(e);
-                }
-            }, Runnable::run);
-        }
     }
 
     /// the instance of this class
@@ -203,5 +107,53 @@ public class AuthenticationService {
     /// @return true if a user is signed in, false otherwise
     public boolean isUserSignedIn() {
         return mAuth.getCurrentUser() != null;
+    }
+
+    public void updateCurrentUserEmail(@NotNull final String newEmail, @NotNull final AuthCallback callback) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            callback.onFailed(new Exception("No user is currently signed in."));
+            return;
+        }
+        user.updateEmail(newEmail).addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error updating email", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            callback.onCompleted(user.getUid());
+        });
+    }
+
+    public void updateCurrentUserPassword(@NotNull final String newPassword, @NotNull final AuthCallback callback) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            callback.onFailed(new Exception("No user is currently signed in."));
+            return;
+        }
+        user.updatePassword(newPassword).addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error updating password", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            callback.onCompleted(user.getUid());
+        });
+    }
+
+    public void deleteCurrentUser(@NotNull final AuthCallback callback) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            callback.onFailed(new Exception("No user is currently signed in."));
+            return;
+        }
+        user.delete().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error deleting user", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            callback.onCompleted(null);
+        });
     }
 }

@@ -1,16 +1,9 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
-
-configurations {
-    firebaseAdmin
-}
 
 android {
     namespace 'com.example.testapp'
@@ -67,42 +60,4 @@ dependencies {
     */
     implementation libs.gson
 
-    /*
-        Add the dependency for the Firebase Admin SDK
-        Include firebase-admin as a shadowed dependency
-    */
-    firebaseAdmin(libs.firebase.admin) {
-        exclude group: 'com.google.code.gson', module: 'gson'
-        exclude group: 'com.google.guava', module: 'listenablefuture'
-        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
-    }
-
-    def shadedJar = file('./build/libs/firebase-admin-shaded.jar')
-    if (shadedJar.exists()) {
-        implementation files(shadedJar)
-    } else {
-        logger.warn("⚠️ firebase-admin-shaded.jar not found. Skipping inclusion.")
-        logger.warn("⚠️ Run the shadowJar task in gradle to generate the shaded jar.")
-    }
-
-}
-
-
-//////////////////////////////
-// Shadow Jar Configuration //
-//////////////////////////////
-
-// Register ShadowJar tasks for creating a shadow jar with the Firebase Admin SDK
-tasks.register("shadow", ShadowJar) {
-    group = "shadow" // This makes it show under a "shadow" group in Gradle tasks
-    description = "Create a shadow jar"
-    archiveBaseName.set("firebase-admin-shaded")
-    configurations = [project.configurations.firebaseAdmin]
-
-    relocate 'com.google.firebase', 'com.google.admin_firebase'
-    relocate 'com.google.common.util.concurrent', 'shadow.com.google.common.util.concurrent'
-
-    exclude 'META-INF/*.SF'
-    exclude 'META-INF/*.DSA'
-    exclude 'META-INF/*.RSA'
 }

@@ -111,4 +111,8 @@ public class User implements Serializable {
     public int hashCode() {
         return uid.hashCode();
     }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.testapp.screens;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,13 +10,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -25,13 +23,14 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.testapp.R;
 import com.example.testapp.adapters.ImageSourceAdapter;
 import com.example.testapp.models.Food;
+import com.example.testapp.models.ImageSourceOption;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.ImageUtil;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
-import java.util.Map;
 
-public class AddFoodActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddFoodActivity extends BaseActivity implements View.OnClickListener {
 
     /// tag for logging
     private static final String TAG = "AddFoodActivity";
@@ -39,7 +38,6 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
     private EditText foodNameEditText, foodPriceEditText;
     private Button addFoodButton;
     private ImageView foodImageView;
-    private DatabaseService databaseService;
 
     /// Activity result launcher for selecting image from gallery
     private ActivityResultLauncher<Intent> selectImageLauncher;
@@ -60,9 +58,6 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
 
         /// request permission for the camera and storage
         ImageUtil.requestPermission(this);
-
-        /// get the instance of the database service
-        databaseService = DatabaseService.getInstance();
 
         /// get the views
         foodNameEditText = findViewById(R.id.food_name);
@@ -118,28 +113,32 @@ public class AddFoodActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    /// show the dialog to select the image source
-    /// gallery or camera
-    /// @see AlertDialog
+    /// show the image source dialog
+    /// this dialog will show the options to select image from gallery or capture image from camera
+    /// @see ImageSourceOption
+    /// @see ImageSourceAdapter
+    /// @see BottomSheetDialog
     private void showImageSourceDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select Image Source");
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_image_source, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
 
-        final ArrayList<Map.Entry<String, Integer>> options = new ArrayList<>();
-        options.add(Map.entry("Gallery", R.drawable.gallery_thumbnail));
-        options.add(Map.entry("Camera", R.drawable.photo_camera));
+        final ArrayList<ImageSourceOption> options = new ArrayList<>();
+        options.add(new ImageSourceOption(getString(R.string.gallery_title), getString(R.string.gallery_description), R.drawable.gallery_thumbnail));
+        options.add(new ImageSourceOption(getString(R.string.camera_title), getString(R.string.camera_description), R.drawable.photo_camera));
 
-        ImageSourceAdapter adapter = new ImageSourceAdapter(this, options);
-
-        builder.setAdapter(adapter, (DialogInterface dialog, int index) -> {
-            if (index == 0) {
+        ListView listView = bottomSheetView.findViewById(R.id.list_view_image_sources);
+        ImageSourceAdapter adapter = new ImageSourceAdapter(this, options, option -> {
+            bottomSheetDialog.dismiss();
+            if (option.getTitle().equals(getString(R.string.gallery_title))) {
                 selectImageFromGallery();
-            } else if (index == 1) {
+            } else if (option.getTitle().equals(getString(R.string.camera_title))) {
                 captureImageFromCamera();
             }
         });
+        listView.setAdapter(adapter);
 
-        builder.show();
+        bottomSheetDialog.show();
     }
 
     /// add the food to the database

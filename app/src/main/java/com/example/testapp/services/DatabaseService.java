@@ -2,22 +2,25 @@ package com.example.testapp.services;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
 import com.example.testapp.models.User;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 
 /// a service to interact with the Firebase Realtime Database.
@@ -69,7 +72,8 @@ public class DatabaseService {
     }
 
 
-    // private generic methods to write and read data from the database
+    // region private generic methods
+    // to write and read data from the database
 
     /// write data to the database at a specific path
     /// @param path the path to write the data to
@@ -136,14 +140,8 @@ public class DatabaseService {
     /// @param path the path to get the data from
     /// @param clazz the class of the objects to return
     /// @param callback the callback to call when the operation is completed
-    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull Map<String, String> filter, @NotNull final DatabaseCallback<List<T>> callback) {
-        Query dbRef = readData(path);
-
-        for (Map.Entry<String, String> entry : filter.entrySet()) {
-            dbRef = dbRef.orderByChild(entry.getKey()).equalTo(entry.getValue());
-        }
-
-        dbRef.get().addOnCompleteListener(task -> {
+    private <T> void getDataList(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<List<T>> callback) {
+        readData(path).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
@@ -169,12 +167,48 @@ public class DatabaseService {
         return databaseReference.child(path).push().getKey();
     }
 
-    // end of private methods for reading and writing data
+
+    /// run a transaction on the data at a specific path </br>
+    /// good for incrementing a value or modifying an object in the database
+    /// @param path the path to run the transaction on
+    /// @param clazz the class of the object to return
+    /// @param function the function to apply to the current value of the data
+    /// @param callback the callback to call when the operation is completed
+    /// @see DatabaseReference#runTransaction(Transaction.Handler)
+    private <T> void runTransaction(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull UnaryOperator<T> function, @NotNull final DatabaseCallback<T> callback) {
+        readData(path).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                T currentValue = currentData.getValue(clazz);
+                if (currentValue == null) {
+                    currentValue = function.apply(null);
+                } else {
+                    currentValue = function.apply(currentValue);
+                }
+                currentData.setValue(currentValue);
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error != null) {
+                    Log.e(TAG, "Transaction failed", error.toException());
+                    callback.onFailed(error.toException());
+                    return;
+                }
+                T result = currentData != null ? currentData.getValue(clazz) : null;
+                callback.onCompleted(result);
+            }
+        });
+
+    }
+
+    // endregion of private methods for reading and writing data
 
     // public methods to interact with the database
 
-
-    // start user section
+    // region User Section
 
     /// create a new user in the database
     /// @param user the user object to create
@@ -206,19 +240,19 @@ public class DatabaseService {
     /// @see List
     /// @see User
     public void getUserList(@NotNull final DatabaseCallback<List<User>> callback) {
-        getDataList("users", User.class, new HashMap<>(), callback);
+        getDataList("users", User.class, callback);
     }
 
     /// delete a user from the database
-    /// @param user the user to delete
+    /// @param uid the user id to delete
     /// @param callback the callback to call when the operation is completed
     public void deleteUser(@NotNull final String uid, @Nullable final DatabaseCallback<Void> callback) {
         deleteData("users/" + uid, callback);
     }
 
-    // end user section
+    // endregion User Section
 
-    // start food section
+    // region food section
 
     /// create a new food in the database
     /// @param food the food object to create
@@ -250,7 +284,7 @@ public class DatabaseService {
     /// @see List
     /// @see Food
     public void getFoodList(@NotNull final DatabaseCallback<List<Food>> callback) {
-        getDataList("foods", Food.class, new HashMap<>(), callback);
+        getDataList("foods", Food.class, callback);
     }
 
     /// generate a new id for a new food in the database
@@ -268,9 +302,9 @@ public class DatabaseService {
         deleteData("foods/" + foodId, callback);
     }
 
-    // end food section
+    // endregion food section
 
-    // start cart section
+    // region cart section
 
     /// create a new cart in the database
     /// @param cart the cart object to create
@@ -299,25 +333,25 @@ public class DatabaseService {
     ///               the callback will receive a list of cart objects
     ///
     public void getCartList(@NotNull final DatabaseCallback<List<Cart>> callback) {
-        getDataList("carts", Cart.class, new HashMap<>(), callback);
+        getDataList("carts", Cart.class, callback);
     }
 
     /// get all the carts of a specific user from the database
-    /// NOTE!!!
-    /// NEED TO *ADD* TO EXISTING RULES IN REALTIME DATABASE FIREBASE:
-    /// {
-    ///   "rules": {
-    ///     "carts": {
-    ///       ".indexOn": ["uid"]
-    ///     }
-    ///   }
-    /// }
     /// @param uid the id of the user to get the carts for
     /// @param callback the callback to call when the operation is completed
     public void getUserCartList(@NotNull String uid, @NotNull final DatabaseCallback<List<Cart>> callback) {
-        Map<String, String> filter = new HashMap<>();
-        filter.put("uid", uid);
-        getDataList("carts", Cart.class, filter, callback);
+        getCartList(new DatabaseCallback<>() {
+            @Override
+            public void onCompleted(List<Cart> carts) {
+                carts.removeIf(cart -> !Objects.equals(cart.getUid(), uid));
+                callback.onCompleted(carts);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                callback.onFailed(e);
+            }
+        });
     }
 
 
@@ -336,6 +370,6 @@ public class DatabaseService {
         deleteData("carts/" + cartId, callback);
     }
 
-    // end cart section
+    // endregion cart section
 
 }

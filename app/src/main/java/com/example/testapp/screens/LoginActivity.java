@@ -6,9 +6,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -25,15 +25,14 @@ import com.example.testapp.utils.Validator;
 /// It contains fields for the user to enter their email and password
 /// It also contains a button to log in the user
 /// When the user is logged in, they are redirected to the main activity
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "LoginActivity";
 
     private EditText etEmail, etPassword;
     private Button btnLogin;
+    private TextView tvRegister;
 
-    private AuthenticationService authenticationService;
-    private DatabaseService databaseService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,18 +46,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             return insets;
         });
 
-        /// get the instance of the authentication service
-        authenticationService = AuthenticationService.getInstance();
-        /// get the instance of the database service
-        databaseService = DatabaseService.getInstance();
-
         /// get the views
         etEmail = findViewById(R.id.et_login_email);
         etPassword = findViewById(R.id.et_login_password);
         btnLogin = findViewById(R.id.btn_login_login);
+        tvRegister = findViewById(R.id.tv_login_register);
 
         /// set the click listener
         btnLogin.setOnClickListener(this);
+        tvRegister.setOnClickListener(this);
     }
 
     @Override
@@ -85,6 +81,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             /// Login user
             loginUser(email, password);
+        } else if (v.getId() == tvRegister.getId()) {
+            /// Navigate to Register Activity
+            Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(registerIntent);
         }
     }
 

@@ -3,33 +3,27 @@ package com.example.testapp.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.TextView;
 
 import com.example.testapp.R;
 import com.example.testapp.adapters.UserAdapter;
 import com.example.testapp.models.User;
-import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
-import com.example.testapp.utils.SharedPreferencesUtil;
 
 import java.util.List;
 
-public class UsersListActivity extends AppCompatActivity {
+public class UsersListActivity extends BaseActivity {
 
     private static final String TAG = "UsersListActivity";
-    private RecyclerView usersList;
     private UserAdapter userAdapter;
-    private DatabaseService databaseService;
-    private AuthenticationService.Admin adminService;
+    private TextView tvUserCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,27 +36,25 @@ public class UsersListActivity extends AppCompatActivity {
             return insets;
         });
 
-        databaseService = DatabaseService.getInstance();
-        adminService = AuthenticationService.Admin.getInstance(this);
-
-        usersList = findViewById(R.id.rv_users_list);
+        RecyclerView usersList = findViewById(R.id.rv_users_list);
+        tvUserCount = findViewById(R.id.tv_user_count);
         usersList.setLayoutManager(new LinearLayoutManager(this));
-        UserAdapter.OnUserClickListener onUserClickListener = user -> {
-            // Handle user click
-            Log.d(TAG, "User clicked: " + user);
-            Intent intent = new Intent(this, UserProfileActivity.class);
-            intent.putExtra("USER_UID", user.getUid());
-            startActivity(intent);
+        userAdapter = new UserAdapter(new UserAdapter.OnUserClickListener() {
+            @Override
+            public void onUserClick(User user) {
+                // Handle user click
+                Log.d(TAG, "User clicked: " + user);
+                Intent intent = new Intent(UsersListActivity.this, UserProfileActivity.class);
+                intent.putExtra("USER_UID", user.getUid());
+                startActivity(intent);
+            }
 
-        };
-        UserAdapter.OnUserClickListener onLongUserClickListener = user -> {
-            // Handle long user click
-            Log.d(TAG, "User long clicked: " + user);
-            // show popup to delete user
-            showDeleteUserDialog(user);
-
-        };
-        userAdapter = new UserAdapter(onUserClickListener, onLongUserClickListener);
+            @Override
+            public void onLongUserClick(User user) {
+                // Handle long user click
+                Log.d(TAG, "User long clicked: " + user);
+            }
+        });
         usersList.setAdapter(userAdapter);
     }
 
@@ -74,6 +66,7 @@ public class UsersListActivity extends AppCompatActivity {
             @Override
             public void onCompleted(List<User> users) {
                 userAdapter.setUserList(users);
+                tvUserCount.setText("Total users: " + users.size());
             }
 
             @Override
@@ -83,47 +76,4 @@ public class UsersListActivity extends AppCompatActivity {
         });
     }
 
-    private void showDeleteUserDialog(User user) {
-        Log.d(TAG, "Want to delete user: " + user);
-        Log.d(TAG, "Current user: " + SharedPreferencesUtil.getUser(this));
-        if (user.equals(SharedPreferencesUtil.getUser(this))) {
-            Log.d(TAG, "Cannot delete current user");
-            Toast.makeText(this, "Cannot delete current user", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        new AlertDialog.Builder(this)
-            .setTitle("Delete User")
-            .setMessage("Are you sure you want to delete this user?")
-            .setPositiveButton(android.R.string.yes, (dialog, which) -> deleteUser(user))
-            .setNegativeButton(android.R.string.no, null)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .show();
-    }
-
-
-    private void deleteUser(User user) {
-        adminService.deleteUser(user.getUid(),
-                new AuthenticationService.AuthCallback() {
-            @Override
-            public void onCompleted(String uid) {
-                databaseService.deleteUser(uid, new DatabaseService.DatabaseCallback<>() {
-                    @Override
-                    public void onCompleted(Void aVoid) {
-                        Log.d(TAG, "User deleted: " + user);
-                        userAdapter.removeUser(user);
-                    }
-
-                    @Override
-                    public void onFailed(Exception e) {
-                        Log.e(TAG, "Failed to delete user: " + user, e);
-                    }
-                });
-            }
-
-            @Override
-            public void onFailed(Exception e) {
-                Log.e(TAG, "Failed to delete user: " + user, e);
-            }
-        });
-    }
 }
