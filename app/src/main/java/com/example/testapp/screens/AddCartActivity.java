@@ -26,6 +26,7 @@ import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.DatabaseService;
+import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -143,7 +144,7 @@ public class AddCartActivity extends BaseActivity implements View.OnClickListene
 
         /// generate a new id for the new cart
         String cartId = databaseService.generateCartId();
-        String userId = authenticationService.getCurrentUserId();
+        String userId = SharedPreferencesUtil.getUserId(AddCartActivity.this);
         /// create a new cart
         Cart cart = new Cart(cartId, cartName,  selectedFoods, userId);
         /// save the cart to the database and get the result in the callback

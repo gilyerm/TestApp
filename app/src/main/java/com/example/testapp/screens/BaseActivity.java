@@ -8,20 +8,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.testapp.R;
-import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
 
 public class BaseActivity extends AppCompatActivity {
 
-    protected AuthenticationService authenticationService;
     protected DatabaseService databaseService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /// get the instance of the authentication service
-        authenticationService = AuthenticationService.getInstance();
         /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
     }

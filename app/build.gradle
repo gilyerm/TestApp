@@ -49,10 +49,6 @@ dependencies {
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation libs.google.firebase.database
 
-    // Add the dependency for the Firebase Authentication library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation libs.google.firebase.auth
-
     /*
         Add the dependency for the GSON library
         This dependency is used to parse JSON data.

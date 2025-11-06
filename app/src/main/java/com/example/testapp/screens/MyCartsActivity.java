@@ -18,6 +18,7 @@ import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.models.Cart;
 import com.example.testapp.services.DatabaseService;
+import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.List;
@@ -73,7 +74,8 @@ public class MyCartsActivity extends BaseActivity {
 
     private void loadCarts() {
         progressBar.setVisibility(View.VISIBLE);
-        databaseService.getUserCartList(authenticationService.getCurrentUserId(), new DatabaseService.DatabaseCallback<List<Cart>>() {
+        String currentUserUid = SharedPreferencesUtil.getUser(this).getUid();
+        databaseService.getUserCartList(currentUserUid, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Cart> carts) {
                 Log.d(TAG, "onCompleted: " + carts);

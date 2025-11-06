@@ -15,7 +15,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
-import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
@@ -115,46 +114,30 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void loginUser(String email, String password) {
-        authenticationService.signIn(email, password, new AuthenticationService.AuthCallback() {
+        databaseService.getUserByEmailAndPassword(email, password, new DatabaseService.DatabaseCallback<User>() {
             /// Callback method called when the operation is completed
-            /// @param uid the user ID of the user that is logged in
+            /// @param user the user object that is logged in
             @Override
-            public void onCompleted(String uid) {
-                Log.d(TAG, "onCompleted: User logged in successfully");
-                /// get the user data from the database
-                databaseService.getUser(uid, new DatabaseService.DatabaseCallback<>() {
-                    @Override
-                    public void onCompleted(User user) {
-                        Log.d(TAG, "onCompleted: User data retrieved successfully");
-                        /// save the user data to shared preferences
-                        SharedPreferencesUtil.saveUser(LoginActivity.this, user);
-                        /// Redirect to main activity and clear back stack to prevent user from going back to login screen
-                        Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        /// Clear the back stack (clear history) and start the MainActivity
-                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainIntent);
-                    }
-
-                    @Override
-                    public void onFailed(Exception e) {
-                        Log.e(TAG, "onFailed: Failed to retrieve user data", e);
-                        /// Show error message to user
-                        etPassword.setError("Invalid email or password");
-                        etPassword.requestFocus();
-                        /// Sign out the user if failed to retrieve user data
-                        /// This is to prevent the user from being logged in again
-                        authenticationService.signOut();
-                    }
-                });
+            public void onCompleted(User user) {
+                Log.d(TAG, "onCompleted: User logged in: " + user.toString());
+                /// save the user data to shared preferences
+                SharedPreferencesUtil.saveUser(LoginActivity.this, user);
+                /// Redirect to main activity and clear back stack to prevent user from going back to login screen
+                Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                /// Clear the back stack (clear history) and start the MainActivity
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(mainIntent);
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "onFailed: Failed to log in user", e);
+                Log.e(TAG, "onFailed: Failed to retrieve user data", e);
                 /// Show error message to user
                 etPassword.setError("Invalid email or password");
                 etPassword.requestFocus();
-
+                /// Sign out the user if failed to retrieve user data
+                /// This is to prevent the user from being logged in again
+                SharedPreferencesUtil.signOutUser(LoginActivity.this);
             }
         });
     }

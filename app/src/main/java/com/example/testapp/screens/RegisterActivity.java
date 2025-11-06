@@ -16,7 +16,6 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
-import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
@@ -155,51 +154,56 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private void registerUser(String email, String password, String fName, String lName, String phone) {
         Log.d(TAG, "registerUser: Registering user...");
 
-        /// call the sign up method of the authentication service
-        authenticationService.signUp(email, password, new AuthenticationService.AuthCallback() {
+        String uid = databaseService.generateUserId();
 
+        /// create a new user object
+        User user = new User(uid, email, password, fName,lName, phone, false);
+
+        databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<>() {
             @Override
-            public void onCompleted(String uid) {
-                Log.d(TAG, "onCompleted: User registered successfully");
-                /// create a new user object
-                User user = new User(uid, email, password, fName,lName, phone, false);
-
-                /// call the createNewUser method of the database service
-                databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<>() {
-
-                    @Override
-                    public void onCompleted(Void object) {
-                        Log.d(TAG, "onCompleted: User registered successfully");
-                        /// save the user to shared preferences
-                        SharedPreferencesUtil.saveUser(RegisterActivity.this, user);
-                        Log.d(TAG, "onCompleted: Redirecting to MainActivity");
-                        /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
-                        Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
-                        /// clear the back stack (clear history) and start the MainActivity
-                        mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainIntent);
-                    }
-
-                    @Override
-                    public void onFailed(Exception e) {
-                        Log.e(TAG, "onFailed: Failed to register user", e);
-                        /// show error message to user
-                        Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
-                        /// sign out the user if failed to register
-                        /// this is to prevent the user from being logged in again
-                        authenticationService.signOut();
-                    }
-                });
+            public void onCompleted(Boolean exists) {
+                if (exists) {
+                    Log.e(TAG, "onCompleted: Email already exists");
+                    /// show error message to user
+                    Toast.makeText(RegisterActivity.this, "Email already exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    /// proceed to create the user
+                    createUserInDatabase(user);
+                }
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "onFailed: Failed to register user", e);
+                Log.e(TAG, "onFailed: Failed to check if email exists", e);
                 /// show error message to user
                 Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
             }
         });
+    }
 
+    private void createUserInDatabase(User user) {
+        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void object) {
+                Log.d(TAG, "createUserInDatabase: User created successfully");
+                /// save the user to shared preferences
+                SharedPreferencesUtil.saveUser(RegisterActivity.this, user);
+                Log.d(TAG, "createUserInDatabase: Redirecting to MainActivity");
+                /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
+                Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+                /// clear the back stack (clear history) and start the MainActivity
+                mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(mainIntent);
+            }
 
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "createUserInDatabase: Failed to create user", e);
+                /// show error message to user
+                Toast.makeText(RegisterActivity.this, "Failed to register user", Toast.LENGTH_SHORT).show();
+                /// sign out the user if failed to register
+                SharedPreferencesUtil.signOutUser(RegisterActivity.this);
+            }
+        });
     }
 }

@@ -11,14 +11,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
-import com.example.testapp.services.AuthenticationService;
+import com.example.testapp.utils.SharedPreferencesUtil;
 
 public class SplashActivity extends AppCompatActivity {
 
     private static final String TAG = "SplashActivity";
     private static final int SPLASH_DISPLAY_TIME = 3000; // 3 seconds
-
-    AuthenticationService authenticationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +29,6 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-        /// get the instance of the authentication service
-        authenticationService = AuthenticationService.getInstance();
-
 
         Thread splashThread = new Thread(() -> {
             try {
@@ -43,7 +38,7 @@ public class SplashActivity extends AppCompatActivity {
                 // go to the correct activity after the delay
                 Intent intent;
                 /// Check if user is signed in or not and redirect to LandingActivity if not signed in
-                if (authenticationService.isUserSignedIn()) {
+                if (SharedPreferencesUtil.isUserLoggedIn(this)) {
                     Log.d(TAG, "User signed in, redirecting to MainActivity");
                     intent = new Intent(SplashActivity.this, MainActivity.class);
                 } else {

@@ -3,6 +3,8 @@ package com.example.testapp.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
+
 import com.example.testapp.models.User;
 import com.google.gson.Gson;
 
@@ -126,6 +128,9 @@ public class SharedPreferencesUtil {
     /// @see User
     /// @see #isUserLoggedIn(Context)
     public static User getUser(Context context) {
+        if (!isUserLoggedIn(context)) {
+            return null;
+        }
         return getObject(context, "user", User.class);
     }
 
@@ -141,6 +146,18 @@ public class SharedPreferencesUtil {
     /// @see #contains(Context, String)
     public static boolean isUserLoggedIn(Context context) {
         return contains(context, "user");
+    }
+
+    /// Get the user id of the logged in user
+    /// @param context The context to use
+    /// @return The user id of the logged in user, or null if no user is logged in
+    @Nullable
+    public static String getUserId(Context context) {
+        User user = getUser(context);
+        if (user != null) {
+            return user.getUid();
+        }
+        return null;
     }
 
 

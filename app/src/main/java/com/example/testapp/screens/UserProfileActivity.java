@@ -10,14 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
-import com.example.testapp.services.AuthenticationService;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
@@ -48,11 +46,13 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
 
         selectedUid = getIntent().getStringExtra("USER_UID");
         User currentUser = SharedPreferencesUtil.getUser(this);
+        assert currentUser != null;
+
         if (selectedUid == null) {
             selectedUid = currentUser.getUid();
         }
         isCurrentUser = selectedUid.equals(currentUser.getUid());
-        if (!isCurrentUser && !currentUser.isAdmin()) {
+        if (!currentUser.isAdmin()) {
             // If the user is not an admin and the selected user is not the current user
             // then finish the activity
             Toast.makeText(this, "You are not authorized to view this profile", Toast.LENGTH_SHORT).show();
@@ -181,7 +181,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
             return;
         }
         else if (isCurrentUser) {
-            updateUserInAuthenticationAndDatabase(selectedUser);
+            updateUserInDatabase(selectedUser);
         }
         else if (selectedUser.isAdmin()) {
             // update the user in the database
@@ -189,38 +189,9 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private void updateUserInAuthenticationAndDatabase(User user) {
-        Log.d(TAG, "Updating user in authentication and database");
-        authenticationService.updateCurrentUserEmail(user.getEmail(), new AuthenticationService.AuthCallback() {
-            @Override
-            public void onCompleted(String uid) {
-                Log.d(TAG, "User email updated successfully: " + uid);
-                authenticationService.updateCurrentUserPassword(user.getPassword(), new AuthenticationService.AuthCallback() {
-                    @Override
-                    public void onCompleted(String uid) {
-                        Log.d(TAG, "User password updated successfully: " + uid);
-                        updateUserInDatabase(user);
-                    }
-
-                    @Override
-                    public void onFailed(Exception e) {
-                        Log.e(TAG, "Error updating user password", e);
-                        Toast.makeText(UserProfileActivity.this, "Failed to update password", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            @Override
-            public void onFailed(Exception e) {
-                Log.e(TAG, "Error updating user email", e);
-                Toast.makeText(UserProfileActivity.this, "Failed to update email", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void updateUserInDatabase(User user) {
         Log.d(TAG, "Updating user in database: " + user.getUid());
-        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void result) {
                 Log.d(TAG, "User profile updated successfully");
@@ -267,7 +238,6 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
 
     private void signOut() {
         Log.d(TAG, "Sign out button clicked");
-        authenticationService.signOut();
         SharedPreferencesUtil.signOutUser(UserProfileActivity.this);
 
         Log.d(TAG, "User signed out, redirecting to LandingActivity");
