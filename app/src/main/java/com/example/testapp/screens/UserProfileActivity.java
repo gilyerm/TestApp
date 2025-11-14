@@ -49,9 +49,9 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
         assert currentUser != null;
 
         if (selectedUid == null) {
-            selectedUid = currentUser.getUid();
+            selectedUid = currentUser.getId();
         }
-        isCurrentUser = selectedUid.equals(currentUser.getUid());
+        isCurrentUser = selectedUid.equals(currentUser.getId());
         if (!currentUser.isAdmin()) {
             // If the user is not an admin and the selected user is not the current user
             // then finish the activity
@@ -168,7 +168,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
 
         // Update the user data in the authentication
         Log.d(TAG, "Updating user profile");
-        Log.d(TAG, "Selected user UID: " + selectedUser.getUid());
+        Log.d(TAG, "Selected user UID: " + selectedUser.getId());
         Log.d(TAG, "Is current user: " + isCurrentUser);
         Log.d(TAG, "User email: " + selectedUser.getEmail());
         Log.d(TAG, "User password: " + selectedUser.getPassword());
@@ -190,7 +190,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void updateUserInDatabase(User user) {
-        Log.d(TAG, "Updating user in database: " + user.getUid());
+        Log.d(TAG, "Updating user in database: " + user.getId());
         databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void result) {

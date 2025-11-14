@@ -74,7 +74,7 @@ public class MyCartsActivity extends BaseActivity {
 
     private void loadCarts() {
         progressBar.setVisibility(View.VISIBLE);
-        String currentUserUid = SharedPreferencesUtil.getUser(this).getUid();
+        String currentUserUid = SharedPreferencesUtil.getUser(this).getId();
         databaseService.getUserCartList(currentUserUid, new DatabaseService.DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Cart> carts) {

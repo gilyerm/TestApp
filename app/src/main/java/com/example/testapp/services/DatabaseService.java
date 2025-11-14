@@ -232,7 +232,7 @@ public class DatabaseService {
     /// @see DatabaseCallback
     /// @see User
     public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        writeData(USERS_PATH + "/" + user.getUid(), user, callback);
+        writeData(USERS_PATH + "/" + user.getId(), user, callback);
     }
 
     /// get a user from the database
@@ -273,49 +273,50 @@ public class DatabaseService {
     /// @see DatabaseCallback
     /// @see User
     public void getUserByEmailAndPassword(@NotNull final String email, @NotNull final String password, @NotNull final DatabaseCallback<User> callback) {
-        readData(USERS_PATH).orderByChild("email").equalTo(email).get()
-            .addOnCompleteListener(task -> {
-                if (!task.isSuccessful()) {
-                    Log.e(TAG, "Error getting data", task.getException());
-                    callback.onFailed(task.getException());
-                    return;
-                }
-                if (task.getResult().getChildrenCount() == 0) {
-                    callback.onFailed(new Exception("User not found"));
-                    return;
-                }
-                for (DataSnapshot dataSnapshot : task.getResult().getChildren()) {
-                    User user = dataSnapshot.getValue(User.class);
-                    if (user == null || !Objects.equals(user.getPassword(), password)) {
-                        callback.onFailed(new Exception("Invalid email or password"));
+        getUserList(new DatabaseCallback<List<User>>() {
+            @Override
+            public void onCompleted(List<User> users) {
+                for (User user : users) {
+                    if (Objects.equals(user.getEmail(), email) && Objects.equals(user.getPassword(), password)) {
+                        callback.onCompleted(user);
                         return;
                     }
-
-                    callback.onCompleted(user);
-                    return;
-
                 }
-            });
+                callback.onCompleted(null);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+
+            }
+        });
     }
 
     /// check if an email already exists in the database
     /// @param email the email to check
     /// @param callback the callback to call when the operation is completed
     public void checkIfEmailExists(@NotNull final String email, @NotNull final DatabaseCallback<Boolean> callback) {
-        readData(USERS_PATH).orderByChild("email").equalTo(email).get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.e(TAG, "Error getting data", task.getException());
-                        callback.onFailed(task.getException());
+        getUserList(new DatabaseCallback<List<User>>() {
+            @Override
+            public void onCompleted(List<User> users) {
+                for (User user : users) {
+                    if (Objects.equals(user.getEmail(), email)) {
+                        callback.onCompleted(true);
                         return;
                     }
-                    boolean exists = task.getResult().getChildrenCount() > 0;
-                    callback.onCompleted(exists);
-                });
+                }
+                callback.onCompleted(false);
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+
+            }
+        });
     }
 
     public void updateUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        runTransaction(USERS_PATH + "/" + user.getUid(), User.class, currentUser -> user, new DatabaseCallback<User>() {
+        runTransaction(USERS_PATH + "/" + user.getId(), User.class, currentUser -> user, new DatabaseCallback<User>() {
             @Override
             public void onCompleted(User object) {
                 if (callback != null) {

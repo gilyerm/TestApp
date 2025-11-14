@@ -45,7 +45,7 @@ public class UsersListActivity extends BaseActivity {
                 // Handle user click
                 Log.d(TAG, "User clicked: " + user);
                 Intent intent = new Intent(UsersListActivity.this, UserProfileActivity.class);
-                intent.putExtra("USER_UID", user.getUid());
+                intent.putExtra("USER_UID", user.getId());
                 startActivity(intent);
             }
 

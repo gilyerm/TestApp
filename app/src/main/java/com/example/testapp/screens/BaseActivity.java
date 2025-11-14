@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.testapp.R;
 import com.example.testapp.services.DatabaseService;
+import com.example.testapp.utils.SharedPreferencesUtil;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -17,7 +18,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
     }

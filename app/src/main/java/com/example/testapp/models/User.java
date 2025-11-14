@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class User implements Serializable {
 
     /// unique id of the user
-    private String uid;
+    private String id;
 
     private String email, password;
     private String firstName, lastName;
@@ -19,8 +19,8 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(String uid, String email, String password, String firstName, String lastName, String phone, boolean isAdmin) {
-        this.uid = uid;
+    public User(String id, String email, String password, String firstName, String lastName, String phone, boolean isAdmin) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
@@ -29,12 +29,12 @@ public class User implements Serializable {
         this.isAdmin = isAdmin;
     }
 
-    public String getUid() {
-        return uid;
+    public String getId() {
+        return id;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -88,11 +88,11 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-                "uid='" + uid + '\'' +
+                "id='" + id + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", LastName='" + lastName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", isAdmin=" + isAdmin +
                 '}';
@@ -104,12 +104,12 @@ public class User implements Serializable {
         if (object == null || getClass() != object.getClass()) return false;
 
         User user = (User) object;
-        return uid.equals(user.uid);
+        return id.equals(user.id);
     }
 
     @Override
     public int hashCode() {
-        return uid.hashCode();
+        return id.hashCode();
     }
 
     public String getFullName() {
