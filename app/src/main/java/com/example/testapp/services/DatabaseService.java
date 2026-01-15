@@ -81,6 +81,16 @@ public class DatabaseService {
     // region private generic methods
     // to write and read data from the database
 
+
+    /// read data from the database at a specific path
+    /// @param path the path to read the data from
+    /// @return a DatabaseReference object to read the data from
+    /// @see DatabaseReference
+
+    private DatabaseReference readData(@NotNull final String path) {
+        return databaseReference.child(path);
+    }
+
     /// write data to the database at a specific path
     /// @param path the path to write the data to
     /// @param data the data to write (can be any object, but must be serializable, i.e. must have a default constructor and all fields must have getters and setters)
@@ -110,17 +120,8 @@ public class DatabaseService {
             } else {
                 if (callback == null) return;
                 callback.onCompleted(null);
-        }
-    });
-    }
-
-    /// read data from the database at a specific path
-    /// @param path the path to read the data from
-    /// @return a DatabaseReference object to read the data from
-    /// @see DatabaseReference
-
-    private DatabaseReference readData(@NotNull final String path) {
-        return databaseReference.child(path);
+            }
+        });
     }
 
 
@@ -168,7 +169,6 @@ public class DatabaseService {
     /// @return a new id for the object
     /// @see String
     /// @see DatabaseReference#push()
-
     private String generateNewId(@NotNull final String path) {
         return databaseReference.child(path).push().getKey();
     }
@@ -181,15 +181,15 @@ public class DatabaseService {
     /// @param function the function to apply to the current value of the data
     /// @param callback the callback to call when the operation is completed
     /// @see DatabaseReference#runTransaction(Transaction.Handler)
-    private <T> void runTransaction(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull UnaryOperator<T> function, @NotNull final DatabaseCallback<T> callback) {
+    private <T> void runTransaction(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final UnaryOperator<T> function, @NotNull final DatabaseCallback<T> callback) {
         readData(path).runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                // bug note: currentValue can be null even if the data exists in the database.
+                // Firebase will then re-run the transaction with the correct data.
                 T currentValue = currentData.getValue(clazz);
-                if (currentValue == null) {
-                    currentValue = function.apply(null);
-                } else {
+                if (currentValue != null) {
                     currentValue = function.apply(currentValue);
                 }
                 currentData.setValue(currentValue);
@@ -207,7 +207,6 @@ public class DatabaseService {
                 callback.onCompleted(result);
             }
         });
-
     }
 
     // endregion of private methods for reading and writing data
@@ -287,7 +286,7 @@ public class DatabaseService {
 
             @Override
             public void onFailed(Exception e) {
-
+                callback.onFailed(e);
             }
         });
     }
@@ -310,13 +309,13 @@ public class DatabaseService {
 
             @Override
             public void onFailed(Exception e) {
-
+                callback.onFailed(e);
             }
         });
     }
 
-    public void updateUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        runTransaction(USERS_PATH + "/" + user.getId(), User.class, currentUser -> user, new DatabaseCallback<User>() {
+    public void updateUser(@NotNull final String userId, @NotNull UnaryOperator<User> function, @Nullable final DatabaseCallback<Void> callback) {
+        runTransaction(USERS_PATH + "/" + userId, User.class, function, new DatabaseCallback<User>() {
             @Override
             public void onCompleted(User object) {
                 if (callback != null) {

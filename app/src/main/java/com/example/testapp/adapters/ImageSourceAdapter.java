@@ -30,7 +30,7 @@ public class ImageSourceAdapter extends ArrayAdapter<ImageSourceOption> {
 
     public ImageSourceAdapter(@NonNull Context context, @NonNull List<ImageSourceOption> objects,
                               @NonNull OnImageSourceSelectedListener listener) {
-        super(context, R.layout.item_image_source, objects);
+        super(context, R.layout.row_image_source, objects);
         this.inflater = LayoutInflater.from(context);
         this.objects = objects;
         this.listener = listener;
@@ -55,7 +55,7 @@ public class ImageSourceAdapter extends ArrayAdapter<ImageSourceOption> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
-            convertView = this.inflater.inflate(R.layout.item_image_source, parent, false);
+            convertView = this.inflater.inflate(R.layout.row_image_source, parent, false);
         }
 
         /// get the views from the layout

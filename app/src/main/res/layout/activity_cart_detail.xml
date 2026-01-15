@@ -161,7 +161,7 @@
                     android:paddingBottom="16dp"
                     android:clipToPadding="false"
                     android:visibility="visible"
-                    tools:listitem="@layout/item_food" />
+                    tools:listitem="@layout/row_food" />
 
                 <LinearLayout
                     android:id="@+id/empty_state"

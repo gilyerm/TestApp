@@ -67,7 +67,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/header_layout"
-            tools:listitem="@layout/item_cart" />
+            tools:listitem="@layout/row_cart" />
 
         <LinearLayout
             android:id="@+id/empty_state"

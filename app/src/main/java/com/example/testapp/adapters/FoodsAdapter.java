@@ -15,15 +15,13 @@ import com.example.testapp.models.Food;
 import com.example.testapp.utils.ImageUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /// Adapter for the foods recycler view
 /// @see RecyclerView
 /// @see Food
-/// @see R.layout#item_food
+/// @see R.layout#row_food
 public class FoodsAdapter extends RecyclerView.Adapter<FoodsAdapter.ViewHolder> {
 
     private static class ItemCount {
@@ -86,7 +84,7 @@ public class FoodsAdapter extends RecyclerView.Adapter<FoodsAdapter.ViewHolder> 
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         /// inflate the item_selected_food layout
         /// @see R.layout.item_selected_food
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_food, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_food, parent, false);
         return new ViewHolder(view);
     }
 

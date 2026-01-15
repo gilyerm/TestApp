@@ -1,7 +1,5 @@
 package com.example.testapp.adapters;
 
-import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.testapp.R;
 import com.example.testapp.models.Cart;
-import com.example.testapp.screens.CartDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +17,7 @@ import java.util.List;
 /// Adapter for the cart recycler view
 /// @see RecyclerView
 /// @see Cart
-/// @see R.layout#item_cart
+/// @see R.layout#row_cart
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
     public interface CartClickListener {
@@ -38,7 +35,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     @NonNull
     @Override
     public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_cart, parent, false);
         return new CartViewHolder(view);
     }
 

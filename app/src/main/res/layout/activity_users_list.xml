@@ -75,7 +75,7 @@
                     android:layout_height="match_parent"
                     android:padding="8dp"
                     android:clipToPadding="false"
-                    tools:listitem="@layout/item_user" />
+                    tools:listitem="@layout/row_user" />
 
                 <LinearLayout
                     android:id="@+id/empty_state"

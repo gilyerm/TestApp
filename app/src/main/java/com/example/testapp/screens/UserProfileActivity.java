@@ -1,5 +1,7 @@
 package com.example.testapp.screens;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +21,8 @@ import com.example.testapp.models.User;
 import com.example.testapp.services.DatabaseService;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
+
+import java.util.function.UnaryOperator;
 
 public class UserProfileActivity extends BaseActivity implements View.OnClickListener {
 
@@ -52,7 +56,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
             selectedUid = currentUser.getId();
         }
         isCurrentUser = selectedUid.equals(currentUser.getId());
-        if (!currentUser.isAdmin()) {
+        if (!currentUser.isAdmin() && !isCurrentUser) {
             // If the user is not an admin and the selected user is not the current user
             // then finish the activity
             Toast.makeText(this, "You are not authorized to view this profile", Toast.LENGTH_SHORT).show();
@@ -189,9 +193,14 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
-    private void updateUserInDatabase(User user) {
+    private void updateUserInDatabase(final User user) {
         Log.d(TAG, "Updating user in database: " + user.getId());
-        databaseService.updateUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(user.getId(), new UnaryOperator<User>() {
+            @Override
+            public User apply(User dbUser) {
+                return user;
+            }
+        }, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void result) {
                 Log.d(TAG, "User profile updated successfully");

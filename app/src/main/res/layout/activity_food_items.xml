@@ -30,6 +30,6 @@
         android:layout_height="match_parent"
         android:padding="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_food" />
+        tools:listitem="@layout/row_food" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
