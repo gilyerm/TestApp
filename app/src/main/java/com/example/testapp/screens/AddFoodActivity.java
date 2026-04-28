@@ -24,7 +24,7 @@ import com.example.testapp.R;
 import com.example.testapp.adapters.ImageSourceAdapter;
 import com.example.testapp.models.Food;
 import com.example.testapp.models.ImageSourceOption;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.ImageUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -158,7 +158,7 @@ public class AddFoodActivity extends BaseActivity implements View.OnClickListene
         double price = Double.parseDouble(priceText);
 
         /// generate a new id for the food
-        String id = databaseService.generateFoodId();
+        String id = databaseService.getFoodService().generateId();
 
         Log.d(TAG, "Adding food to database");
         Log.d(TAG, "ID: " + id);
@@ -170,7 +170,7 @@ public class AddFoodActivity extends BaseActivity implements View.OnClickListene
         Food food = new Food(id, name, price, imageBase64);
 
         /// save the food to the database and get the result in the callback
-        databaseService.createNewFood(food, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getFoodService().create(food, new DatabaseCallback<>() {
             @Override
             public void onCompleted(Void object) {
                 Log.d(TAG, "Food added successfully");
@@ -181,7 +181,7 @@ public class AddFoodActivity extends BaseActivity implements View.OnClickListene
                 foodPriceEditText.setText("");
                 foodImageView.setImageBitmap(null);
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to add food", e);

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Cart implements Serializable {
+public class Cart implements Serializable, Identifiable {
 
     /// unique id of the cart
     private String id;

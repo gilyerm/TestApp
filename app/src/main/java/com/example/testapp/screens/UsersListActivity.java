@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.UserAdapter;
 import com.example.testapp.models.User;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 import java.util.List;
 
@@ -62,13 +62,13 @@ public class UsersListActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        databaseService.getUserList(new DatabaseService.DatabaseCallback<>() {
+        databaseService.getUserService().getAll(new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<User> users) {
                 userAdapter.setUserList(users);
                 tvUserCount.setText("Total users: " + users.size());
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to get users list", e);

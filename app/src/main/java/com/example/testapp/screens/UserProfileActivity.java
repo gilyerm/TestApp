@@ -18,7 +18,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.IDatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 
@@ -102,7 +103,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
 
     private void showUserProfile() {
         // Get the user data from database
-        databaseService.getUser(selectedUid, new DatabaseService.DatabaseCallback<User>() {
+        databaseService.getUserService().getById(selectedUid, new DatabaseCallback<User>() {
             @Override
             public void onCompleted(User user) {
                 selectedUser = user;
@@ -117,7 +118,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
                 String displayName = user.getFirstName() + " " + user.getLastName();
                 tvUserDisplayName.setText(displayName);
                 tvUserDisplayEmail.setText(user.getEmail());
-
+        
                 // Show/hide admin badge based on user's admin status
                 if (user.isAdmin()) {
                     adminBadge.setVisibility(View.VISIBLE);
@@ -127,7 +128,7 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
                     Log.d(TAG, "User is not admin, hiding admin badge");
                 }
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Error getting user profile", e);
@@ -195,19 +196,19 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
 
     private void updateUserInDatabase(final User user) {
         Log.d(TAG, "Updating user in database: " + user.getId());
-        databaseService.updateUser(user.getId(), new UnaryOperator<User>() {
+        databaseService.getUserService().update(user.getId(), new UnaryOperator<User>() {
             @Override
             public User apply(User dbUser) {
                 return user;
             }
-        }, new DatabaseService.DatabaseCallback<Void>() {
+        }, new DatabaseCallback<>() {
             @Override
             public void onCompleted(Void result) {
                 Log.d(TAG, "User profile updated successfully");
                 Toast.makeText(UserProfileActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
                 showUserProfile(); // Refresh the profile view
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Error updating user profile", e);

@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 
@@ -154,12 +154,12 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private void registerUser(String email, String password, String fName, String lName, String phone) {
         Log.d(TAG, "registerUser: Registering user...");
 
-        String uid = databaseService.generateUserId();
+        String uid = databaseService.getUserService().generateId();
 
         /// create a new user object
         User user = new User(uid, email, password, fName,lName, phone, false);
 
-        databaseService.checkIfEmailExists(email, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getUserService().checkIfEmailExists(email, new DatabaseCallback<>() {
             @Override
             public void onCompleted(Boolean exists) {
                 if (exists) {
@@ -171,7 +171,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                     createUserInDatabase(user);
                 }
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "onFailed: Failed to check if email exists", e);
@@ -182,7 +182,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void createUserInDatabase(User user) {
-        databaseService.createNewUser(user, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.getUserService().create(user, new DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void object) {
                 Log.d(TAG, "createUserInDatabase: User created successfully");
@@ -195,7 +195,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(mainIntent);
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "createUserInDatabase: Failed to create user", e);

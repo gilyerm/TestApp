@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.models.Cart;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
@@ -75,7 +75,7 @@ public class MyCartsActivity extends BaseActivity {
     private void loadCarts() {
         progressBar.setVisibility(View.VISIBLE);
         String currentUserUid = SharedPreferencesUtil.getUser(this).getId();
-        databaseService.getUserCartList(currentUserUid, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getCartService().getUserCartList(currentUserUid, new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Cart> carts) {
                 Log.d(TAG, "onCompleted: " + carts);
@@ -83,7 +83,7 @@ public class MyCartsActivity extends BaseActivity {
                 progressBar.setVisibility(View.GONE);
                 updateEmptyState();
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 progressBar.setVisibility(View.GONE);

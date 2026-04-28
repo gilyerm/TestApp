@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Food;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 import java.util.List;
 
@@ -47,13 +47,13 @@ public class FoodItemsActivity extends BaseActivity {
     }
 
     private void loadFoodItems() {
-        databaseService.getFoodList(new DatabaseService.DatabaseCallback<List<Food>>() {
+        databaseService.getFoodService().getAll(new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Food> foods) {
                 Log.d(TAG, "Successfully loaded " + foods.size() + " food items");
                 foodsAdapter.addFoods(foods);
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to load food items", e);

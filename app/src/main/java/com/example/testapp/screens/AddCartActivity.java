@@ -25,7 +25,7 @@ import android.widget.ArrayAdapter;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
@@ -143,12 +143,12 @@ public class AddCartActivity extends BaseActivity implements View.OnClickListene
         }
 
         /// generate a new id for the new cart
-        String cartId = databaseService.generateCartId();
+        String cartId = databaseService.getCartService().generateId();
         String userId = SharedPreferencesUtil.getUserId(AddCartActivity.this);
         /// create a new cart
         Cart cart = new Cart(cartId, cartName,  selectedFoods, userId);
         /// save the cart to the database and get the result in the callback
-        databaseService.createNewCart(cart, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getCartService().create(cart, new DatabaseCallback<>() {
             @Override
             public void onCompleted(Void object) {
                 Log.d(TAG, "Cart created successfully");
@@ -163,9 +163,9 @@ public class AddCartActivity extends BaseActivity implements View.OnClickListene
                 /// @see itemCount
                 foodsAdapter.notifyItemRangeRemoved(0, itemCount);
                 Toast.makeText(AddCartActivity.this, "Cart created successfully", Toast.LENGTH_SHORT).show();
-
+        
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to create cart", e);
@@ -189,7 +189,7 @@ public class AddCartActivity extends BaseActivity implements View.OnClickListene
     }
 
     private void loadFoodsFromDatabase() {
-        databaseService.getFoodList(new DatabaseService.DatabaseCallback<List<Food>>() {
+        databaseService.getFoodService().getAll(new DatabaseCallback<List<Food>>() {
             @Override
             public void onCompleted(List<Food> foods) {
                 Log.d(TAG, "Successfully loaded " + foods.size() + " foods");
@@ -204,7 +204,7 @@ public class AddCartActivity extends BaseActivity implements View.OnClickListene
                     Log.d(TAG, "Default food selected: " + _selectedFood.getName());
                 }
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to load foods", e);

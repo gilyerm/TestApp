@@ -16,7 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.models.Cart;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
+import com.example.testapp.services.IDatabaseService;
 
 public class CartDetailActivity extends BaseActivity {
 
@@ -52,7 +53,7 @@ public class CartDetailActivity extends BaseActivity {
         }
         progressBar.setVisibility(View.VISIBLE);
         rvCartItems.setVisibility(View.GONE);
-        databaseService.getCart(cart_id, new DatabaseService.DatabaseCallback<>() {
+        databaseService.getCartService().getById(cart_id, new DatabaseCallback<>() {
             @Override
             public void onCompleted(Cart cart) {
                 progressBar.setVisibility(View.GONE);
@@ -64,10 +65,10 @@ public class CartDetailActivity extends BaseActivity {
                 }
                 setCartView(cart);
             }
-
+        
             @Override
             public void onFailed(Exception e) {
-
+        
             }
         });
     }

@@ -6,7 +6,7 @@ import java.io.Serializable;
 /// This class represents a user in the application
 /// It contains the user's information
 /// @see Serializable
-public class User implements Serializable {
+public class User implements Serializable, Identifiable {
 
     /// unique id of the user
     private String id;

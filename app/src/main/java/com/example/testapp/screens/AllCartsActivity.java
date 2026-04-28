@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.models.Cart;
-import com.example.testapp.services.DatabaseService;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 import java.util.List;
 
@@ -51,13 +51,13 @@ public class AllCartsActivity extends BaseActivity {
     }
 
     private void loadAllCarts() {
-        databaseService.getCartList(new DatabaseService.DatabaseCallback<List<Cart>>() {
+        databaseService.getCartService().getAll(new DatabaseCallback<>() {
             @Override
             public void onCompleted(List<Cart> carts) {
                 Log.d(TAG, "Successfully loaded " + carts.size() + " carts");
                 cartAdapter.setCartList(carts);
             }
-
+        
             @Override
             public void onFailed(Exception e) {
                 Log.e(TAG, "Failed to load carts", e);

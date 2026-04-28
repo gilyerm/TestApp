@@ -9,7 +9,7 @@ import java.util.Objects;
 /// for example, a single item in a menu
 /// or a single item in a shopping cart
 /// tomato, apple, etc.
-public class Food implements Serializable {
+public class Food implements Serializable, Identifiable {
 
     /// unique id of the food
     private String id;
