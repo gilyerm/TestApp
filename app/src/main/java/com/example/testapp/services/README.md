@@ -16,6 +16,8 @@
 
 | Class | Description |
 |:------|:------------|
-| `DatabaseService` | Singleton implementing `IDatabaseService` — wires each service to its Firebase implementation. Swap the backend by changing the `Impl` classes here. |
+| `DatabaseService` | Singleton implementing `IDatabaseService` — wires each service to its implementation. Swap the backend by changing the `impl` classes here. |
 
-> 📂 See [`Impl/`](Impl/) for the Firebase Realtime Database implementations.
+> 📂 Implementations are organized by backend:
+> - [`impl/rtdb/`](impl/rtdb/) — Firebase Realtime Database implementations
+> - [`impl/firestore/`](impl/firestore/) — Cloud Firestore implementations

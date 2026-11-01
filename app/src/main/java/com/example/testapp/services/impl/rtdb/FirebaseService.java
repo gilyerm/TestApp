@@ -1,4 +1,4 @@
-package com.example.testapp.services.Impl;
+package com.example.testapp.services.impl.rtdb;
 
 import android.util.Log;
 
@@ -25,13 +25,13 @@ import java.util.function.UnaryOperator;
 /// Subclasses only need to call {@code super(tableName, clazz)} and add domain-specific methods.
 /// Shared CRUD methods are {@code final} to prevent accidental overrides.
 /// @param <T> the entity type, must implement {@link Identifiable}
-/// @see UserServiceImpl
-/// @see FoodServiceImpl
-/// @see CartServiceImpl
+/// @see UserFirebaseServiceImpl
+/// @see FoodFirebaseServiceImpl
+/// @see CartFirebaseServiceImpl
 public class FirebaseService<T extends Identifiable> implements ICrudService<T> {
 
     private static final String TAG = "FirebaseService";
-    private final DatabaseReference databaseReference;
+    private final DatabaseReference tableReference;
     private final String tableName;
     private final Class<T> clazz;
 
@@ -41,7 +41,7 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
     protected FirebaseService(@NotNull String tableName, @NotNull Class<T> clazz) {
         this.tableName = tableName;
         this.clazz = clazz;
-        this.databaseReference = FirebaseDatabase.getInstance().getReference();
+        this.tableReference = FirebaseDatabase.getInstance().getReference(tableName);
     }
 
     // region ICrudService<T> implementation
@@ -49,39 +49,52 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
     /// {@inheritDoc}
     @Override
     public final String generateId() {
-        return databaseReference.child(tableName).push().getKey();
+        return tableReference.push().getKey();
     }
 
     /// {@inheritDoc}
     @Override
     public final void create(@NotNull T item, @Nullable ICrudService.DatabaseCallback<Void> callback) {
-        writeData(tableName + "/" + item.getId(), item, callback);
+        tableReference.child(item.getId()).setValue(item, (error, ref) -> {
+            if (callback == null) return;
+            if (error != null) callback.onFailed(error.toException());
+            else callback.onCompleted(null);
+        });
     }
 
     /// {@inheritDoc}
     @Override
     public final void getById(@NotNull String id, @NotNull ICrudService.DatabaseCallback<T> callback) {
-        databaseReference.child(tableName).child(id).get().addOnCompleteListener(task -> {
+        tableReference.child(id).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
-            callback.onCompleted(task.getResult().getValue(clazz));
+            DataSnapshot snapshot = task.getResult();
+            callback.onCompleted(snapshot != null ? snapshot.getValue(clazz) : null);
         });
     }
 
     /// {@inheritDoc}
     @Override
     public final void getAll(@NotNull ICrudService.DatabaseCallback<List<T>> callback) {
-        databaseReference.child(tableName).get().addOnCompleteListener(task -> {
+        tableReference.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
             List<T> list = new ArrayList<>();
-            task.getResult().getChildren().forEach(snap -> list.add(snap.getValue(clazz)));
+            DataSnapshot snapshot = task.getResult();
+            if (snapshot != null) {
+                snapshot.getChildren().forEach(snap -> {
+                    T item = snap.getValue(clazz);
+                    if (item != null) {
+                        list.add(item);
+                    }
+                });
+            }
             callback.onCompleted(list);
         });
     }
@@ -89,7 +102,7 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
     /// {@inheritDoc}
     @Override
     public final void delete(@NotNull String id, @Nullable DatabaseCallback<Void> callback) {
-        databaseReference.child(tableName).child(id).removeValue((error, ref) -> {
+        tableReference.child(id).removeValue((error, ref) -> {
             if (callback == null) return;
             if (error != null) callback.onFailed(error.toException());
             else callback.onCompleted(null);
@@ -99,43 +112,14 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
     /// {@inheritDoc}
     @Override
     public void update(@NotNull String id, @NotNull UnaryOperator<T> function, @Nullable DatabaseCallback<Void> callback) {
-        runTransaction(tableName + "/" + id, function, new DatabaseCallback<T>() {
-            @Override
-            public void onCompleted(T object) { if (callback != null) callback.onCompleted(null); }
-
-            @Override
-            public void onFailed(Exception e) { if (callback != null) callback.onFailed(e); }
-        });
-    }
-
-    // endregion
-
-    // region Private helpers
-
-    /// Writes data to a specific path in the database.
-    /// @param path the full path to write to
-    /// @param data the data object to write
-    /// @param callback called on completion or failure (nullable)
-    private void writeData(@NotNull String path, @NotNull Object data, @Nullable DatabaseCallback<Void> callback) {
-        databaseReference.child(path).setValue(data, (error, ref) -> {
-            if (callback == null) return;
-            if (error != null) callback.onFailed(error.toException());
-            else callback.onCompleted(null);
-        });
-    }
-
-    /// Runs a Firebase transaction on the given path.
-    /// Reads the current value, applies the function, and writes the result atomically.
-    /// @param path the full path to run the transaction on
-    /// @param function the transformation to apply to the current value
-    /// @param callback called with the result on success, or with an exception on failure
-    private void runTransaction(@NotNull String path, @NotNull UnaryOperator<T> function, @NotNull DatabaseCallback<T> callback) {
-        databaseReference.child(path).runTransaction(new Transaction.Handler() {
+        tableReference.child(id).runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData currentData) {
                 T currentValue = currentData.getValue(clazz);
-                if (currentValue != null) currentValue = function.apply(currentValue);
+                if (currentValue != null) {
+                    currentValue = function.apply(currentValue);
+                }
                 currentData.setValue(currentValue);
                 return Transaction.success(currentData);
             }
@@ -144,17 +128,25 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
             public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
                 if (error != null) {
                     Log.e(TAG, "Transaction failed", error.toException());
-                    callback.onFailed(error.toException());
+                    if (callback != null) callback.onFailed(error.toException());
                     return;
                 }
-                callback.onCompleted(currentData != null ? currentData.getValue(clazz) : null);
+                if (callback != null) callback.onCompleted(null);
             }
         });
     }
 
+    // endregion
+
+    /// Returns the database reference for this table.
+    /// @return the {@link DatabaseReference} pointing to this table
+    protected DatabaseReference getTableReference() {
+        return tableReference;
+    }
+
     /// Returns the table name this service operates on.
     /// @return the Firebase path/table name
-    protected String getTableName() { return tableName; }
-
-    // endregion
+    protected String getTableName() {
+        return tableName;
+    }
 }

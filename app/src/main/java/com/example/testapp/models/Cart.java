@@ -76,6 +76,13 @@ public class Cart implements Serializable, Identifiable {
         return foods;
     }
 
+    public void setFoods(List<Food> foods) {
+        this.foods.clear();
+        if (foods != null) {
+            this.foods.addAll(foods);
+        }
+    }
+
     public double getTotalPrice() {
         double totalPrice = 0;
         for (Food food : foods) {

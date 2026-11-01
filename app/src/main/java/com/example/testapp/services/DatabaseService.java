@@ -1,16 +1,16 @@
 package com.example.testapp.services;
 
-import com.example.testapp.services.Impl.CartServiceImpl;
-import com.example.testapp.services.Impl.FoodServiceImpl;
-import com.example.testapp.services.Impl.UserServiceImpl;
+import com.example.testapp.services.impl.firestore.CartFirestoreServiceImpl;
+import com.example.testapp.services.impl.firestore.FoodFirestoreServiceImpl;
+import com.example.testapp.services.impl.firestore.UserFirestoreServiceImpl;
 
 /// Singleton implementation of {@link IDatabaseService}.
-/// Wires each domain service to its concrete Firebase implementation.
-/// To swap the database backend, change the Impl classes instantiated here.
+/// Wires each domain service to its concrete Cloud Firestore implementation.
+/// To swap the database backend, change the impl classes instantiated here.
 /// @see IDatabaseService
-/// @see UserServiceImpl
-/// @see FoodServiceImpl
-/// @see CartServiceImpl
+/// @see UserFirestoreServiceImpl
+/// @see FoodFirestoreServiceImpl
+/// @see CartFirestoreServiceImpl
 public class DatabaseService implements IDatabaseService {
 
     private static DatabaseService instance;
@@ -20,9 +20,9 @@ public class DatabaseService implements IDatabaseService {
     private final ICartService cartService;
 
     private DatabaseService() {
-        userService = new UserServiceImpl();
-        foodService = new FoodServiceImpl();
-        cartService = new CartServiceImpl();
+        userService = new UserFirestoreServiceImpl();
+        foodService = new FoodFirestoreServiceImpl();
+        cartService = new CartFirestoreServiceImpl();
     }
 
     /// Returns the singleton instance of the database service.
