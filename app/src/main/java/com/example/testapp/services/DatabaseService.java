@@ -35,14 +35,18 @@ public class DatabaseService implements IDatabaseService {
     /// Creates a new DatabaseService for the specified backend.
     /// @param backend the desired {@link DatabaseBackend}
     public DatabaseService(DatabaseBackend backend) {
-        if (backend == DatabaseBackend.REALTIME_DATABASE) {
-            this.userService = new UserFirebaseServiceImpl();
-            this.foodService = new FoodFirebaseServiceImpl();
-            this.cartService = new CartFirebaseServiceImpl();
-        } else {
-            this.userService = new UserFirestoreServiceImpl();
-            this.foodService = new FoodFirestoreServiceImpl();
-            this.cartService = new CartFirestoreServiceImpl();
+        switch (backend) {
+            case REALTIME_DATABASE:
+                this.userService = new UserFirebaseServiceImpl();
+                this.foodService = new FoodFirebaseServiceImpl();
+                this.cartService = new CartFirebaseServiceImpl();
+                break;
+            case FIRESTORE:
+            default:
+                this.userService = new UserFirestoreServiceImpl();
+                this.foodService = new FoodFirestoreServiceImpl();
+                this.cartService = new CartFirestoreServiceImpl();
+                break;
         }
     }
 
