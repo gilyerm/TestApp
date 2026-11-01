@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.util.Base64;
 import android.widget.ImageView;
 
@@ -33,25 +32,29 @@ public class ImageUtil {
                 }, 1);
     }
 
-    /// Convert an image to a base64 string
+    /// Convert an ImageView image to a WebP base64 string
     /// @param postImage The image to convert
-    /// @return The base64 string representation of the image
+    /// @return The base64 string representation of the image in WebP format
     public static @Nullable String convertTo64Base(@NotNull final ImageView postImage) {
-        if (postImage.getDrawable() == null) {
+        if (!(postImage.getDrawable() instanceof BitmapDrawable bitmapDrawable)) {
             return null;
         }
-        Bitmap bitmap = ((BitmapDrawable) postImage.getDrawable()).getBitmap();
+
+        Bitmap bitmap = bitmapDrawable.getBitmap();
+        if (bitmap == null) {
+            return null;
+        }
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 80, byteArrayOutputStream);
+        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
     }
 
     /// Convert a base64 string to an image
     /// @param base64Code The base64 string to convert
     /// @return The image represented by the base64 string
-    public static @Nullable Bitmap convertFrom64base(@NotNull final String base64Code) {
-        if (base64Code.isEmpty()) {
+    public static @Nullable Bitmap convertFrom64base(@Nullable final String base64Code) {
+        if (base64Code == null || base64Code.isEmpty()) {
             return null;
         }
         byte[] decodedString = Base64.decode(base64Code, Base64.DEFAULT);
