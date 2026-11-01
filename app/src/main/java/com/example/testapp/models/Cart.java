@@ -26,7 +26,7 @@ public class Cart implements Serializable, Identifiable {
     public Cart(String id, String title, List<Food> foods, String uid) {
         this.id = id;
         this.title = title;
-        this.foods = foods;
+        this.foods = foods != null ? foods : new ArrayList<>();
         this.uid = uid;
     }
 
