@@ -7,12 +7,14 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
+import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.utils.SharedPreferencesUtil;
 
 /// Main activity for the app
@@ -23,9 +25,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Button btnAddFood, btnAddCart, btnToAdmin, btnUserProfile, btnMyCarts;
 
     /// the current user instance
-    /// NOTE:
-    /// THIS IS THE INSTANCE WHEN THE USER LOGS IN
-    /// THIS IS NOT THE REALTIME USER INSTANCE
     private User user;
 
     @Override
@@ -40,9 +39,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             return insets;
         });
 
-        /// get the user data from shared preferences
+        /// get the user data from shared preferences initially for fast loading
         user = SharedPreferencesUtil.getUser(MainActivity.this);
-        Log.d(TAG, "User: " + user);
+        Log.d(TAG, "User loaded from cache: " + user);
 
         /// get the views
         btnAddFood = findViewById(R.id.btn_main_add_food);
@@ -51,7 +50,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnToAdmin = findViewById(R.id.btn_main_to_admin);
         btnUserProfile = findViewById(R.id.btn_main_edit_profile);
 
-
         /// set the click listeners
         btnAddFood.setOnClickListener(this);
         btnAddCart.setOnClickListener(this);
@@ -59,9 +57,54 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         btnToAdmin.setOnClickListener(this);
         btnUserProfile.setOnClickListener(this);
 
-        if (user != null && user.isAdmin()) {
-            btnToAdmin.setVisibility(View.VISIBLE);
-            findViewById(R.id.admin_card).setVisibility(View.VISIBLE);
+        updateAdminUI();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshUserData();
+    }
+
+    /// Refreshes user data from the database to keep local state up to date
+    private void refreshUserData() {
+        String userId = SharedPreferencesUtil.getUserId(MainActivity.this);
+        if (userId == null) {
+            return;
+        }
+
+        databaseService.getUserService().getById(userId, new DatabaseCallback<User>() {
+            @Override
+            public void onCompleted(@Nullable User updatedUser) {
+                if (updatedUser == null) {
+                    Log.w(TAG, "User no longer exists in database, signing out");
+                    SharedPreferencesUtil.signOutUser(MainActivity.this);
+                    Intent intent = new Intent(MainActivity.this, LandingActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    return;
+                }
+
+                Log.d(TAG, "User refreshed from database: " + updatedUser);
+                user = updatedUser;
+                SharedPreferencesUtil.saveUser(MainActivity.this, updatedUser);
+                updateAdminUI();
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "Failed to refresh user data from database", e);
+            }
+        });
+    }
+
+    /// Updates admin button and card visibility based on the current user's admin status
+    private void updateAdminUI() {
+        boolean isAdmin = (user != null && user.isAdmin());
+        btnToAdmin.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+        View adminCard = findViewById(R.id.admin_card);
+        if (adminCard != null) {
+            adminCard.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
         }
     }
 

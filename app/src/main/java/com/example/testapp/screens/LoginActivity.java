@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -118,7 +119,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             /// Callback method called when the operation is completed
             /// @param user the user object that is logged in
             @Override
-            public void onCompleted(User user) {
+            public void onCompleted(@Nullable User user) {
+                if (user == null) {
+                    Log.w(TAG, "onCompleted: User not found or invalid password");
+                    etPassword.setError("Invalid email or password");
+                    etPassword.requestFocus();
+                    return;
+                }
                 Log.d(TAG, "onCompleted: User logged in: " + user.toString());
                 /// save the user data to shared preferences
                 SharedPreferencesUtil.saveUser(LoginActivity.this, user);

@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -105,7 +106,13 @@ public class UserProfileActivity extends BaseActivity implements View.OnClickLis
         // Get the user data from database
         databaseService.getUserService().getById(selectedUid, new DatabaseCallback<User>() {
             @Override
-            public void onCompleted(User user) {
+            public void onCompleted(@Nullable User user) {
+                if (user == null) {
+                    Log.w(TAG, "onCompleted: User profile not found");
+                    Toast.makeText(UserProfileActivity.this, "User profile not found", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
                 selectedUser = user;
                 // Set the user data to the EditText fields
                 etUserFirstName.setText(user.getFirstName());
