@@ -6,6 +6,7 @@ import com.example.testapp.models.User;
 import com.example.testapp.services.IUserService;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /// Cloud Firestore implementation of {@link IUserService}.
 /// Inherits generic CRUD operations from {@link FirestoreService} for the "users" collection.
@@ -23,7 +24,7 @@ public class UserFirestoreServiceImpl extends FirestoreService<User> implements 
     /// {@inheritDoc}
     /// Executes a server-side indexed query matching email and password.
     @Override
-    public void getUserByEmailAndPassword(@NotNull String email, @NotNull String password, @NotNull DatabaseCallback<User> callback) {
+    public void getUserByEmailAndPassword(@NotNull String email, @NotNull String password, @NotNull DatabaseCallback<@Nullable User> callback) {
         getCollectionReference()
                 .whereEqualTo("email", email)
                 .whereEqualTo("password", password)
