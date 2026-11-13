@@ -1,13 +1,21 @@
 # 📦 models
 
-> Data classes representing the core entities of the application.
+> Data classes for the main entities of the app. These are the objects stored in the database.
 
-| Class | Description |
-|:------|:------------|
-| `User` | App user — email, password, name, phone, admin flag |
-| `Food` | Single food item — name, price, base64 image |
-| `Cart` | Shopping cart owned by a user, holds a list of `Food` items with add/remove and total price calculation |
-| `Identifiable` | Interface requiring `getId()` — used by the generic CRUD service layer |
-| `ImageSourceOption` | UI helper for image-source selection dialogs (title, description, icon) |
+| Class | Fields | Notes |
+|:------|:-------|:------|
+| `User` | `id`, `email`, `password`, `firstName`, `lastName`, `phone`, `isAdmin` | `getFullName()` joins first and last name |
+| `Food` | `id`, `name`, `price`, `imageBase64` | Copy constructor `Food(Food other)`; image is a base64 string |
+| `Cart` | `id`, `title`, `foods` (`List<Food>`), `uid` (owner's user ID) | `addFood`, `addFoods`, `removeFood`, `getFood`, `clear`, `getTotalPrice()` |
+| `Identifiable` | — | Interface with `getId()`; required by the generic `ICrudService<T>` |
+| `ImageSourceOption` | `title`, `description`, `iconResource` | UI-only model for the camera/gallery picker; **not** stored in the database |
 
-All entity classes implement `Serializable` and `Identifiable`.
+## Rules for database entities
+
+`User`, `Food`, and `Cart` all:
+
+- implement `Identifiable` (so the CRUD services can find them by ID) and `Serializable`;
+- have a **public no-argument constructor** and getters/setters — Firebase needs these to convert documents to objects;
+- override `equals` / `hashCode` / `toString`.
+
+Follow the same rules when adding a new entity.
