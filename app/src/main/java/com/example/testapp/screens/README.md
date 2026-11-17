@@ -25,37 +25,40 @@ All fragments extend [`BaseFragment`](../core/) and are shown inside `MainActivi
 
 ## Pattern
 
+A shortened version of the real [`userslist/`](userslist/) screen:
+
 ```java
 // <Name>ViewModel
-public class FooViewModel extends ViewModel {
+public class UsersListViewModel extends ViewModel {
     private final IDatabaseService databaseService;
-    private final MutableLiveData<List<Food>> _foods = new MutableLiveData<>();
-    public final LiveData<List<Food>> foods = _foods;
+    private final MutableLiveData<List<User>> users = new MutableLiveData<>();
 
-    public FooViewModel(IDatabaseService databaseService) {   // required by ViewModelFactory
+    public UsersListViewModel(IDatabaseService databaseService) {   // required by ViewModelFactory
         this.databaseService = databaseService;
     }
 
-    public void load() {
-        databaseService.getFoodService().getAll(new ICrudService.DatabaseCallback<>() {
-            @Override public void onCompleted(List<Food> list) { _foods.postValue(list); }
+    public LiveData<List<User>> getUsers() { return users; }
+
+    public void loadUsers() {
+        databaseService.getUserService().getAll(new ICrudService.DatabaseCallback<>() {
+            @Override public void onCompleted(List<User> list) { users.postValue(list); }
             @Override public void onFailed(Exception e) { /* post an error */ }
         });
     }
 }
 
 // <Name>Fragment
-public class FooFragment extends BaseFragment {
+public class UsersListFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        FooViewModel vm = new ViewModelProvider(this, new ViewModelFactory()).get(FooViewModel.class);
-        vm.foods.observe(getViewLifecycleOwner(), foods -> { /* update UI */ });
-        vm.load();
+        UsersListViewModel vm = new ViewModelProvider(this, new ViewModelFactory()).get(UsersListViewModel.class);
+        vm.getUsers().observe(getViewLifecycleOwner(), users -> { /* update UI */ });
+        vm.loadUsers();
     }
 
     @Override
-    protected String getTitle() { return "Foo"; }
+    protected String getTitle() { return "Users List"; }
 }
 ```
 
