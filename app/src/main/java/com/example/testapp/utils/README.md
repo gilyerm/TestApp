@@ -24,6 +24,20 @@ Images are stored as base64 strings inside `Food` documents instead of in Fireba
 
 **No permissions needed.** The gallery picker (`ACTION_PICK`) and the camera app (`ACTION_IMAGE_CAPTURE`) grant access themselves. Don't add `CAMERA` to the manifest: once declared, `ACTION_IMAGE_CAPTURE` requires it and crashes if the user denied it.
 
+## `ImagePicker`
+
+Bottom sheet to pick an image from the gallery or take one with the camera; shows the result in an `ImageView`. Used by Add Food and User Profile.
+
+| Method | Description |
+|:-------|:------------|
+| `ImagePicker(Fragment, Supplier<ImageView>, Runnable onPicked)` | Create in the fragment's `onCreate` (result launchers must be registered before it starts). The ImageView is looked up when the result arrives. |
+| `show()` | Opens the gallery / camera bottom sheet |
+
+```java
+imagePicker = new ImagePicker(this, () -> imageView, () -> imageChanged = true);
+imageView.setOnClickListener(v -> imagePicker.show());
+```
+
 ## `SharedPreferencesUtil`
 
 Keeps the logged-in user on the device (saved as JSON with Gson).

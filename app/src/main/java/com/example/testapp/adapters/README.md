@@ -8,7 +8,7 @@ All adapters extend **`BaseAdapter<T extends Identifiable, VH>`**, which holds t
 |:--------|:----------|:------|:---------------|:--------|
 | `CartAdapter` | `Cart` | Cart title and item count | `CartClickListener.onCartClick(Cart)` | My Carts, All Carts |
 | `FoodsAdapter` | `FoodRow` (food + quantity) | Food image, name, quantity, unit price, line total | — | Add Cart, Cart Details, Food Items |
-| `UserAdapter` | `User` | Initials, full name, email, phone, "Admin" chip | `OnUserClickListener.onUserClick` / `onLongUserClick` | Users List |
+| `UserAdapter` | `User` | Profile picture (initials if none), full name, email, phone, "Admin" chip | `OnUserClickListener.onUserClick` / `onLongUserClick` | Users List |
 
 ## `BaseAdapter` methods
 

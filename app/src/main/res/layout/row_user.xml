@@ -36,6 +36,14 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorPrimary" />
 
+            <ImageView
+                android:id="@+id/iv_user_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile picture"
+                android:visibility="gone" />
+
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout

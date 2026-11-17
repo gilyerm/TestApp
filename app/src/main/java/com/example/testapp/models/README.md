@@ -4,7 +4,7 @@
 
 | Class | Fields | Notes |
 |:------|:-------|:------|
-| `User` | `id`, `email`, `password`, `firstName`, `lastName`, `phone`, `isAdmin` | `getFullName()` joins first and last name |
+| `User` | `id`, `email`, `password`, `firstName`, `lastName`, `phone`, `isAdmin`, `imageBase64` (profile picture, may be `null`) | `getFullName()` joins first and last name |
 | `Food` | `id`, `name`, `price`, `imageBase64` | Copy constructor `Food(Food other)`; image is a base64 string |
 | `Cart` | `id`, `title`, `foods` (`List<Food>`), `uid` (owner's user ID) | `addFood`, `addFoods`, `removeFood`, `getFood`, `clear`, `getTotalPrice()` |
 | `Identifiable` | — | Interface with `getId()`; required by the generic `ICrudService<T>` |

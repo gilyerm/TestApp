@@ -32,11 +32,22 @@
                     android:gravity="center"
                     android:padding="32dp">
 
-                    <ImageView
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         android:layout_marginBottom="16dp"
-                        android:src="@drawable/ic_launcher" />
+                        app:cardCornerRadius="50dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:id="@+id/iv_user_profile_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:contentDescription="Profile picture"
+                            android:src="@drawable/ic_launcher" />
+
+                    </com.google.android.material.card.MaterialCardView>
 
                     <TextView
                         android:id="@+id/tv_user_display_name"

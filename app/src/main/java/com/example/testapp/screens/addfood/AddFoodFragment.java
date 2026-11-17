@@ -1,27 +1,19 @@
 package com.example.testapp.screens.addfood;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
+import com.example.testapp.utils.ImagePicker;
 import com.example.testapp.utils.ImageUtil;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 /**
  * AddFoodFragment provides the user interface for adding new food items.
@@ -32,8 +24,7 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
     private EditText foodNameEditText, foodPriceEditText;
     private Button addFoodButton;
     private ImageView foodImageView;
-    private ActivityResultLauncher<Intent> selectImageLauncher;
-    private ActivityResultLauncher<Intent> captureImageLauncher;
+    private ImagePicker imagePicker;
 
     /**
      * Returns the title of the fragment.
@@ -54,24 +45,7 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        selectImageLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                Uri selectedImage = result.getData().getData();
-                foodImageView.setImageURI(selectedImage);
-                foodImageView.setTag(null);
-            }
-        });
-        captureImageLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                Bitmap bitmap = (Bitmap) result.getData().getExtras().get("data");
-                foodImageView.setImageBitmap(bitmap);
-                foodImageView.setTag(null);
-            }
-        });
+        imagePicker = new ImagePicker(this, () -> foodImageView, () -> foodImageView.setTag(null));
     }
 
     /**
@@ -131,35 +105,8 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
         if (v.getId() == addFoodButton.getId()) {
             addFoodToDatabase();
         } else if (v.getId() == foodImageView.getId()) {
-            showImageSourceDialog();
+            imagePicker.show();
         }
-    }
-
-    /**
-     * Displays a dialog allowing the user to select an image source (gallery or camera).
-     */
-    private void showImageSourceDialog() {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
-        View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_image_source, null);
-        bottomSheetDialog.setContentView(bottomSheetView);
-        setupImageSourceRow(bottomSheetView.findViewById(R.id.option_gallery), bottomSheetDialog,
-                R.string.gallery_title, R.string.gallery_description, R.drawable.gallery_thumbnail, this::selectImageFromGallery);
-        setupImageSourceRow(bottomSheetView.findViewById(R.id.option_camera), bottomSheetDialog,
-                R.string.camera_title, R.string.camera_description, R.drawable.photo_camera, this::captureImageFromCamera);
-        bottomSheetDialog.show();
-    }
-
-    /**
-     * Fills one image-source row (icon, title, description) and runs the action when it is tapped.
-     */
-    private void setupImageSourceRow(View row, BottomSheetDialog dialog, int titleRes, int descriptionRes, int iconRes, Runnable action) {
-        ((ImageView) row.findViewById(R.id.icon_dialog_item)).setImageResource(iconRes);
-        ((TextView) row.findViewById(R.id.text_dialog_item)).setText(titleRes);
-        ((TextView) row.findViewById(R.id.text_dialog_item_description)).setText(descriptionRes);
-        row.setOnClickListener(v -> {
-            dialog.dismiss();
-            action.run();
-        });
     }
 
     /**
@@ -172,22 +119,6 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
         String imageBase64 = ImageUtil.convertTo64Base(foodImageView);
         double price = Double.parseDouble(priceText);
         viewModel.addFood(name, price, imageBase64);
-    }
-
-    /**
-     * Launches the intent to select an image from the device's gallery.
-     */
-    private void selectImageFromGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        selectImageLauncher.launch(intent);
-    }
-
-    /**
-     * Launches the intent to capture a new image using the device's camera.
-     */
-    private void captureImageFromCamera() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        captureImageLauncher.launch(takePictureIntent);
     }
 
     /**

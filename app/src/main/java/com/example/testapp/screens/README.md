@@ -17,7 +17,7 @@ All fragments extend [`BaseFragment`](../core/) and are shown inside `MainActivi
 | `addcart/` | Add Cart | ✅ | Pick foods from a dropdown, name the cart, save it. Picked foods live in `AddCartViewModel.selectedFoods` | food `getAll`, cart `create` |
 | `mycarts/` | My Carts | ✅ | The logged-in user's carts; tap to open details, button to add a cart | `getUserCartList` |
 | `cartdetail/` | Cart Details | ✅ | Title, item count, total price, and items of one cart (`cart_id` argument) | cart `getById` |
-| `userprofile/` | User Profile | ✅ | View/edit a profile and sign out. Opens the logged-in user, or another user for admins (`newInstance(userId)`) | user `getById`, `update` |
+| `userprofile/` | User Profile | ✅ | View/edit a profile, change the profile picture (tap it; own profile only, saved with "Update profile") and sign out. Opens the logged-in user, or another user for admins (`newInstance(userId)`) | user `getById`, `update` |
 | `admin/` | Admin Dashboard | ✅ | Links to Users List, Food Items, All Carts | — |
 | `userslist/` | Users List | ✅ | All users with a count; tap a user to open their profile | user `getAll` |
 | `fooditems/` | Food Items | ✅ | All food items | food `getAll` |

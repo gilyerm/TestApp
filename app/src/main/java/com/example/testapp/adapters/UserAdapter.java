@@ -1,8 +1,10 @@
 package com.example.testapp.adapters;
 
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,10 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.testapp.R;
 import com.example.testapp.models.User;
+import com.example.testapp.utils.ImageUtil;
 import com.google.android.material.chip.Chip;
 
 /// Adapter for the users recycler view.
-/// Each row shows the user's initials, full name, email, phone, and an "Admin" chip for admins.
+/// Each row shows the user's profile picture (or initials if none), full name, email, phone, and an "Admin" chip for admins.
 /// @see BaseAdapter
 /// @see User
 /// @see R.layout#row_user
@@ -70,6 +73,11 @@ public class UserAdapter extends BaseAdapter<User, UserAdapter.ViewHolder> {
         }
         holder.tvInitials.setText(initials.toUpperCase());
 
+        // Show the profile picture over the initials if the user has one
+        Bitmap image = ImageUtil.convertFrom64base(user.getImageBase64());
+        holder.ivImage.setImageBitmap(image);
+        holder.ivImage.setVisibility(image != null ? View.VISIBLE : View.GONE);
+
         // Show admin chip if user is admin
         if (user.isAdmin()) {
             holder.chipRole.setVisibility(View.VISIBLE);
@@ -99,6 +107,7 @@ public class UserAdapter extends BaseAdapter<User, UserAdapter.ViewHolder> {
         final TextView tvEmail;
         final TextView tvPhone;
         final TextView tvInitials;
+        final ImageView ivImage;
         final Chip chipRole;
 
         public ViewHolder(@NonNull View itemView) {
@@ -107,6 +116,7 @@ public class UserAdapter extends BaseAdapter<User, UserAdapter.ViewHolder> {
             tvEmail = itemView.findViewById(R.id.tv_item_user_email);
             tvPhone = itemView.findViewById(R.id.tv_item_user_phone);
             tvInitials = itemView.findViewById(R.id.tv_user_initials);
+            ivImage = itemView.findViewById(R.id.iv_user_image);
             chipRole = itemView.findViewById(R.id.chip_user_role);
         }
     }

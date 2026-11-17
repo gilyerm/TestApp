@@ -1,5 +1,6 @@
 package com.example.testapp.screens.userprofile;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -14,13 +16,17 @@ import androidx.annotation.Nullable;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.models.User;
+import com.example.testapp.utils.ImagePicker;
+import com.example.testapp.utils.ImageUtil;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 import com.example.testapp.screens.landing.LandingFragment;
 
 /**
  * UserProfileFragment displays and manages a user's profile information.
- * It allows the user to update their details or an admin to view them.
+ * It allows the user to update their details and profile picture, or an admin to view them.
+ * Tapping the picture (own profile only) opens the gallery / camera picker; the new picture is saved with the other
+ * fields when "Update profile" is pressed.
  */
 public class UserProfileFragment extends BaseFragment<UserProfileViewModel> implements View.OnClickListener {
     private static final String TAG = "UserProfileFragment";
@@ -29,6 +35,11 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
     private TextView tvUserDisplayName, tvUserDisplayEmail;
     private Button btnUpdateProfile, btnSignOut;
     private View adminBadge;
+    private ImageView ivProfileImage;
+    private ImagePicker imagePicker;
+    /// picture picked but not saved yet, or null if the picture was not changed
+    @Nullable
+    private String pendingImageBase64;
     private String selectedUid;
     private User selectedUser;
     private boolean isCurrentUser = false;
@@ -56,6 +67,18 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
     @Override
     protected String getTitle() {
         return "User Profile";
+    }
+
+    /**
+     * Called to do initial creation of a fragment. Registers the image picker.
+     *
+     * @param savedInstanceState If the fragment is being re-created from a previous saved state, this is the state.
+     */
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imagePicker = new ImagePicker(this, () -> ivProfileImage,
+                () -> pendingImageBase64 = ImageUtil.convertTo64Base(ivProfileImage));
     }
 
     /**
@@ -97,6 +120,10 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
         btnUpdateProfile = view.findViewById(R.id.btn_edit_profile);
         btnSignOut = view.findViewById(R.id.btn_sign_out);
         adminBadge = view.findViewById(R.id.admin_badge);
+        ivProfileImage = view.findViewById(R.id.iv_user_profile_image);
+        if (isCurrentUser) {
+            ivProfileImage.setOnClickListener(this);
+        }
         btnUpdateProfile.setOnClickListener(this);
         btnSignOut.setOnClickListener(this);
         if (!isCurrentUser) {
@@ -122,6 +149,14 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
             String displayName = user.getFirstName() + " " + user.getLastName();
             tvUserDisplayName.setText(displayName);
             tvUserDisplayEmail.setText(user.getEmail());
+            if (pendingImageBase64 == null) {
+                Bitmap image = ImageUtil.convertFrom64base(user.getImageBase64());
+                if (image != null) {
+                    ivProfileImage.setImageBitmap(image);
+                } else {
+                    ivProfileImage.setImageResource(R.drawable.ic_launcher);
+                }
+            }
             if (user.isAdmin()) {
                 adminBadge.setVisibility(View.VISIBLE);
             } else {
@@ -145,6 +180,7 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
         viewModel.getUpdateSuccessLiveData().observe(getViewLifecycleOwner(), success -> {
             if (Boolean.TRUE.equals(success)) {
                 Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                pendingImageBase64 = null;
                 viewModel.loadUser(selectedUid);
             }
         });
@@ -161,6 +197,8 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
             updateUserProfile();
         } else if(v.getId() == R.id.btn_sign_out) {
             signOut();
+        } else if(v.getId() == R.id.iv_user_profile_image) {
+            imagePicker.show();
         }
     }
 
@@ -182,6 +220,9 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
         selectedUser.setPhone(phone);
         selectedUser.setEmail(email);
         selectedUser.setPassword(password);
+        if (pendingImageBase64 != null) {
+            selectedUser.setImageBase64(pendingImageBase64);
+        }
         if (!isCurrentUser && !selectedUser.isAdmin()) {
             Toast.makeText(getContext(), "You can only update your own profile", Toast.LENGTH_SHORT).show();
             return;

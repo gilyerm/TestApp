@@ -16,6 +16,10 @@ public class User implements Serializable, Identifiable {
     private String phone;
     private boolean isAdmin;
 
+    /// profile picture as a WebP base64 string, or null if the user has none
+    /// @see com.example.testapp.utils.ImageUtil
+    private String imageBase64;
+
     public User() {
     }
 
@@ -83,6 +87,14 @@ public class User implements Serializable, Identifiable {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getImageBase64() {
+        return imageBase64;
+    }
+
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
     }
 
     @Override
