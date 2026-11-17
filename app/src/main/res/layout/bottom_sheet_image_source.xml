@@ -40,14 +40,13 @@
         android:textSize="14sp"
         android:textColor="?attr/colorOnSurfaceVariant" />
 
-    <!-- ListView for options -->
-    <ListView
-        android:id="@+id/list_view_image_sources"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:overScrollMode="never"
-        android:nestedScrollingEnabled="false" />
+    <!-- Options -->
+    <include
+        android:id="@+id/option_gallery"
+        layout="@layout/row_image_source" />
+
+    <include
+        android:id="@+id/option_camera"
+        layout="@layout/row_image_source" />
 
 </LinearLayout>

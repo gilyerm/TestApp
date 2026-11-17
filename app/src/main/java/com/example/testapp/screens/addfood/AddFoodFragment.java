@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,13 +20,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
-import com.example.testapp.adapters.ImageSourceAdapter;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.core.ViewModelFactory;
-import com.example.testapp.models.ImageSourceOption;
 import com.example.testapp.utils.ImageUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import java.util.ArrayList;
 
 /**
  * AddFoodFragment provides the user interface for adding new food items.
@@ -148,20 +145,24 @@ public class AddFoodFragment extends BaseFragment implements View.OnClickListene
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
         View bottomSheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_image_source, null);
         bottomSheetDialog.setContentView(bottomSheetView);
-        final ArrayList<ImageSourceOption> options = new ArrayList<>();
-        options.add(new ImageSourceOption(getString(R.string.gallery_title), getString(R.string.gallery_description), R.drawable.gallery_thumbnail));
-        options.add(new ImageSourceOption(getString(R.string.camera_title), getString(R.string.camera_description), R.drawable.photo_camera));
-        ListView listView = bottomSheetView.findViewById(R.id.list_view_image_sources);
-        ImageSourceAdapter adapter = new ImageSourceAdapter(requireContext(), options, option -> {
-            bottomSheetDialog.dismiss();
-            if (option.getTitle().equals(getString(R.string.gallery_title))) {
-                selectImageFromGallery();
-            } else if (option.getTitle().equals(getString(R.string.camera_title))) {
-                captureImageFromCamera();
-            }
-        });
-        listView.setAdapter(adapter);
+        setupImageSourceRow(bottomSheetView.findViewById(R.id.option_gallery), bottomSheetDialog,
+                R.string.gallery_title, R.string.gallery_description, R.drawable.gallery_thumbnail, this::selectImageFromGallery);
+        setupImageSourceRow(bottomSheetView.findViewById(R.id.option_camera), bottomSheetDialog,
+                R.string.camera_title, R.string.camera_description, R.drawable.photo_camera, this::captureImageFromCamera);
         bottomSheetDialog.show();
+    }
+
+    /**
+     * Fills one image-source row (icon, title, description) and runs the action when it is tapped.
+     */
+    private void setupImageSourceRow(View row, BottomSheetDialog dialog, int titleRes, int descriptionRes, int iconRes, Runnable action) {
+        ((ImageView) row.findViewById(R.id.icon_dialog_item)).setImageResource(iconRes);
+        ((TextView) row.findViewById(R.id.text_dialog_item)).setText(titleRes);
+        ((TextView) row.findViewById(R.id.text_dialog_item_description)).setText(descriptionRes);
+        row.setOnClickListener(v -> {
+            dialog.dismiss();
+            action.run();
+        });
     }
 
     /**

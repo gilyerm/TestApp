@@ -8,7 +8,6 @@
 | `Food` | `id`, `name`, `price`, `imageBase64` | Copy constructor `Food(Food other)`; image is a base64 string |
 | `Cart` | `id`, `title`, `foods` (`List<Food>`), `uid` (owner's user ID) | `addFood`, `addFoods`, `removeFood`, `getFood`, `clear`, `getTotalPrice()` |
 | `Identifiable` | — | Interface with `getId()`; required by the generic `ICrudService<T>` |
-| `ImageSourceOption` | `title`, `description`, `iconResource` | UI-only model for the camera/gallery picker; **not** stored in the database |
 
 ## Rules for database entities
 

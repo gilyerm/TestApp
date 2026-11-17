@@ -7,7 +7,6 @@
 | `CartAdapter` | `RecyclerView.Adapter` | Cart title and item count | `CartClickListener.onCartClick(Cart)` | My Carts, All Carts |
 | `FoodsAdapter` | `RecyclerView.Adapter` | Food image, name, quantity, unit price, line total | — | Add Cart, Cart Details, Food Items |
 | `UserAdapter` | `RecyclerView.Adapter` | Initials, full name, email, phone, "Admin" chip | `OnUserClickListener.onUserClick` / `onLongUserClick` | Users List |
-| `ImageSourceAdapter` | `ArrayAdapter` | Camera / gallery options (icon, title, description) | `OnImageSourceSelectedListener.onImageSourceSelected` | Add Food |
 
 ## Notes
 
