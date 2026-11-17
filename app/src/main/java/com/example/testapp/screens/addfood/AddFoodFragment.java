@@ -98,7 +98,6 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(AddFoodViewModel.class);
-        ImageUtil.requestPermission(requireActivity());
         foodNameEditText = view.findViewById(R.id.food_name);
         foodPriceEditText = view.findViewById(R.id.food_price);
         addFoodButton = view.findViewById(R.id.add_food_button);

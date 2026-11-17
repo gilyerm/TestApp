@@ -5,11 +5,6 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-    <!-- Camera permission -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <!-- Storage permission -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Internet permission -->
     <uses-permission android:name="android.permission.INTERNET" />
 

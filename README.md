@@ -130,7 +130,7 @@ The app uses a **Single Activity Architecture** with **MVVM**. `MainActivity` is
 | **services** | Async CRUD interfaces with callbacks; Firestore and Realtime DB implementations |
 | **models** | Entities stored in the database |
 | **adapters** | Display lists of carts, foods, and users |
-| **utils** | Input validation, image conversion/permissions, local session storage |
+| **utils** | Input validation, image conversion, local session storage |
 
 **Data flow:** Fragment calls a ViewModel method → ViewModel calls a service with a `DatabaseCallback` → callback updates `MutableLiveData` → Fragment's observer updates the UI.
 

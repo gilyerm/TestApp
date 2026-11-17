@@ -17,11 +17,12 @@ All methods return `false` for `null`.
 
 | Method | Description |
 |:-------|:------------|
-| `requestPermission(Activity)` | Asks for camera and storage permissions |
-| `convertTo64Base(ImageView)` | Compresses the image in an `ImageView` to WEBP (quality 80) and returns it as a base64 string |
-| `convertFrom64base(String)` | Turns a base64 string back into a `Bitmap` (returns `null` for `null` input) |
+| `convertTo64Base(ImageView)` | Scales the image in an `ImageView` down to at most 512 px per side, compresses it to WEBP (quality 80) and returns it as a base64 string |
+| `convertFrom64base(String)` | Turns a base64 string back into a `Bitmap` (returns `null` for empty or corrupt input) |
 
-Images are stored as base64 strings inside `Food` documents instead of in Firebase Storage.
+Images are stored as base64 strings inside `Food` documents instead of in Firebase Storage. The 512 px limit keeps each document well under Firestore's 1 MiB limit.
+
+**No permissions needed.** The gallery picker (`ACTION_PICK`) and the camera app (`ACTION_IMAGE_CAPTURE`) grant access themselves. Don't add `CAMERA` to the manifest: once declared, `ACTION_IMAGE_CAPTURE` requires it and crashes if the user denied it.
 
 ## `SharedPreferencesUtil`
 
