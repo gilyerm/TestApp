@@ -15,6 +15,7 @@ import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.models.Cart;
+import java.util.Locale;
 
 /**
  * CartDetailFragment displays the details of a specific cart.
@@ -87,7 +88,7 @@ public class CartDetailFragment extends BaseFragment<CartDetailViewModel> {
         if (cart == null) return;
         tvCartTitle.setText(cart.getTitle());
         tvCartTotalAmount.setText(String.valueOf(cart.getFoods().size()));
-        tvCartTotalPrice.setText(String.format("₪%.2f", cart.getTotalPrice()));
+        tvCartTotalPrice.setText(String.format(Locale.getDefault(), "₪%.2f", cart.getTotalPrice()));
         FoodsAdapter foodsAdapter = new FoodsAdapter();
         foodsAdapter.setFoods(cart.getFoods());
         rvCartItems.setAdapter(foodsAdapter);

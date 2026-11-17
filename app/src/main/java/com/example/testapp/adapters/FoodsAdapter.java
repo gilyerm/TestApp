@@ -17,6 +17,7 @@ import com.example.testapp.utils.ImageUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Locale;
 
 /// Adapter for the foods recycler view.
 /// Foods with the same ID are grouped into one row that shows the image, name, quantity, unit price and line total.
@@ -83,8 +84,8 @@ public class FoodsAdapter extends BaseAdapter<FoodsAdapter.FoodRow, FoodsAdapter
         holder.foodNameTextView.setText(food.getName());
         holder.foodImageView.setImageBitmap(ImageUtil.convertFrom64base(food.getImageBase64()));
         holder.foodQuantityTextView.setText(String.valueOf(row.quantity));
-        holder.foodSinglePriceTextView.setText("Single Price: " + String.format("$%.2f", food.getPrice()));
-        holder.foodPriceTextView.setText(String.format("$%.2f", food.getPrice() * row.quantity));
+        holder.foodSinglePriceTextView.setText("Single Price: " + String.format(Locale.getDefault(), "$%.2f", food.getPrice()));
+        holder.foodPriceTextView.setText(String.format(Locale.getDefault(), "$%.2f", food.getPrice() * row.quantity));
     }
 
     /// Holds the views of one food row.

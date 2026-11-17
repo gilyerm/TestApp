@@ -23,6 +23,7 @@ import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * AddCartFragment provides a user interface for creating a new cart.
@@ -67,7 +68,7 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
                 View view = super.getView(position, convertView, parent);
                 Food food = getItem(position);
                 if (food != null && view instanceof TextView) {
-                    ((TextView) view).setText(food.getName() + " - $" + String.format("%.2f", food.getPrice()));
+                    ((TextView) view).setText(food.getName() + " - $" + String.format(Locale.getDefault(), "%.2f", food.getPrice()));
                 }
                 return view;
             }
@@ -77,7 +78,7 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
                 View view = super.getDropDownView(position, convertView, parent);
                 Food food = getItem(position);
                 if (food != null && view instanceof TextView) {
-                    ((TextView) view).setText(food.getName() + " - $" + String.format("%.2f", food.getPrice()));
+                    ((TextView) view).setText(food.getName() + " - $" + String.format(Locale.getDefault(), "%.2f", food.getPrice()));
                 }
                 return view;
             }
