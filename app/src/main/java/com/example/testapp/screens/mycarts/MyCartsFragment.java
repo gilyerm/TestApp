@@ -69,7 +69,7 @@ public class MyCartsFragment extends BaseFragment<MyCartsViewModel> {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(MyCartsViewModel.class);
         viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
-            cartAdapter.setCartList(carts);
+            cartAdapter.setItems(carts);
             if (carts.isEmpty()) {
                 recyclerView.setVisibility(View.GONE);
                 emptyStateLayout.setVisibility(View.VISIBLE);

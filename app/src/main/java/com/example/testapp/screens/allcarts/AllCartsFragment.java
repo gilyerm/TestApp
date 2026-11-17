@@ -57,7 +57,7 @@ public class AllCartsFragment extends BaseFragment<AllCartsViewModel> {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(AllCartsViewModel.class);
         viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
-            cartAdapter.setCartList(carts);
+            cartAdapter.setItems(carts);
         });
         viewModel.error.observe(getViewLifecycleOwner(), errorMsg -> {
             Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();

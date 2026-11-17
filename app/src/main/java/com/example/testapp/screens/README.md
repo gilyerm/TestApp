@@ -14,7 +14,7 @@ All fragments extend [`BaseFragment`](../core/) and are shown inside `MainActivi
 | `register/` | Register | ✅ | Validates input, checks the email is free, creates the user, opens Dashboard | `checkIfEmailExists`, `create` |
 | `dashboard/` | Dashboard | ❌ | Home screen: Add Food, Add Cart, My Carts, Edit Profile; Admin card only for admins | user `getById` |
 | `addfood/` | Add Food | ✅ | Create a food item with name, price, and photo (camera or gallery) | food `create` |
-| `addcart/` | Add Cart | ✅ | Pick foods from a dropdown, name the cart, save it | food `getAll`, cart `create` |
+| `addcart/` | Add Cart | ✅ | Pick foods from a dropdown, name the cart, save it. Picked foods live in `AddCartViewModel.selectedFoods` | food `getAll`, cart `create` |
 | `mycarts/` | My Carts | ✅ | The logged-in user's carts; tap to open details, button to add a cart | `getUserCartList` |
 | `cartdetail/` | Cart Details | ✅ | Title, item count, total price, and items of one cart (`cart_id` argument) | cart `getById` |
 | `userprofile/` | User Profile | ✅ | View/edit a profile and sign out. Opens the logged-in user, or another user for admins (`newInstance(userId)`) | user `getById`, `update` |

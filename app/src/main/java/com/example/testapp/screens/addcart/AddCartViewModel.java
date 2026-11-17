@@ -7,6 +7,7 @@ import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 import com.example.testapp.services.IDatabaseService;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +33,13 @@ public class AddCartViewModel extends ViewModel {
      * LiveData containing any error messages.
      */
     public LiveData<String> error = _error;
+    private final MutableLiveData<List<Food>> _selectedFoods = new MutableLiveData<>(new ArrayList<>());
+
+    /**
+     * LiveData containing the foods picked for the new cart, each repeated by its quantity.
+     * Kept here (not in the adapter) so the picks survive configuration changes.
+     */
+    public LiveData<List<Food>> selectedFoods = _selectedFoods;
 
     /**
      * Constructs an AddCartViewModel with the given database service.
@@ -60,13 +68,25 @@ public class AddCartViewModel extends ViewModel {
     }
 
     /**
-     * Creates a new cart with the specified details.
+     * Adds one unit of a food to the new cart.
      *
-     * @param cartName      the name of the cart
-     * @param selectedFoods the list of foods to add to the cart
-     * @param userId        the ID of the user creating the cart
+     * @param food the food to add; ignored if null
      */
-    public void createCart(String cartName, List<Food> selectedFoods, String userId) {
+    public void addSelectedFood(Food food) {
+        if (food == null) return;
+        List<Food> foods = new ArrayList<>(_selectedFoods.getValue());
+        foods.add(food);
+        _selectedFoods.setValue(foods);
+    }
+
+    /**
+     * Creates a new cart from the selected foods. On success the selection is cleared.
+     *
+     * @param cartName the name of the cart
+     * @param userId   the ID of the user creating the cart
+     */
+    public void createCart(String cartName, String userId) {
+        List<Food> selectedFoods = new ArrayList<>(_selectedFoods.getValue());
         if (cartName.isEmpty()) {
             _error.postValue("Cart name cannot be empty");
             return;
@@ -80,6 +100,7 @@ public class AddCartViewModel extends ViewModel {
         databaseService.getCartService().create(cart, new DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void object) {
+                _selectedFoods.postValue(new ArrayList<>());
                 _cartCreated.postValue(true);
             }
 

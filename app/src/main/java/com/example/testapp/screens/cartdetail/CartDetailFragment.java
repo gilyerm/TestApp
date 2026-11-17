@@ -89,7 +89,7 @@ public class CartDetailFragment extends BaseFragment<CartDetailViewModel> {
         tvCartTotalAmount.setText(String.valueOf(cart.getFoods().size()));
         tvCartTotalPrice.setText(String.format("₪%.2f", cart.getTotalPrice()));
         FoodsAdapter foodsAdapter = new FoodsAdapter();
-        foodsAdapter.addFoods(cart.getFoods());
+        foodsAdapter.setFoods(cart.getFoods());
         rvCartItems.setAdapter(foodsAdapter);
     }
 

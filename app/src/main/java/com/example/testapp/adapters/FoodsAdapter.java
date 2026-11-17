@@ -7,121 +7,96 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.testapp.R;
 import com.example.testapp.models.Food;
+import com.example.testapp.models.Identifiable;
 import com.example.testapp.utils.ImageUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-
-/// Adapter for the foods recycler view
-/// @see RecyclerView
+/// Adapter for the foods recycler view.
+/// Foods with the same ID are grouped into one row that shows the image, name, quantity, unit price and line total.
+/// Takes foods as a flat list (each food repeated by its quantity, the way a `Cart` stores them).
+/// @see BaseAdapter
 /// @see Food
 /// @see R.layout#row_food
-public class FoodsAdapter extends RecyclerView.Adapter<FoodsAdapter.ViewHolder> {
+public class FoodsAdapter extends BaseAdapter<FoodsAdapter.FoodRow, FoodsAdapter.ViewHolder> {
 
-    private static class ItemCount {
-        Food food;
-        int quantity;
-    }
+    /// One row: a food and how many times it appears.
+    public static class FoodRow implements Identifiable {
+        public final Food food;
+        public final int quantity;
 
-    /// list of foods
-    /// @see Food
-    private final List<ItemCount> foodItemCountList;
+        /// @param food the food shown in the row
+        /// @param quantity how many times the food appears
+        public FoodRow(@NonNull Food food, int quantity) {
+            this.food = food;
+            this.quantity = quantity;
+        }
 
-    public FoodsAdapter() {
-        foodItemCountList = new ArrayList<>();
-    }
-
-    public void addFoods(@NonNull List<Food> foods) {
-        for (Food food : foods) {
-            addFood(food);
+        /// @return the food's ID, so rows are matched by food
+        @Override
+        public String getId() {
+            return food.getId();
         }
     }
 
-    public void addFood(@Nullable Food f) {
-        if (f == null) return;
-        for (int i = 0; i < foodItemCountList.size(); i++) {
-            ItemCount itemCount = foodItemCountList.get(i);
-            if (itemCount.food.getId().equals(f.getId())) {
-                itemCount.quantity++;
-                notifyItemChanged(i);
-                return;
+    /// Replace all rows, grouping foods with the same ID.
+    /// @param foods flat list of foods; null entries are skipped
+    public void setFoods(@NonNull List<Food> foods) {
+        List<FoodRow> rows = new ArrayList<>();
+        for (Food f : foods) {
+            if (f == null) continue;
+            int index = -1;
+            for (int i = 0; i < rows.size(); i++) {
+                if (Objects.equals(rows.get(i).getId(), f.getId())) { index = i; break; }
             }
+            if (index == -1) rows.add(new FoodRow(f, 1));
+            else rows.set(index, new FoodRow(rows.get(index).food, rows.get(index).quantity + 1));
         }
-        foodItemCountList.add(new ItemCount() {{
-            this.food = new Food(f);
-            this.quantity = 1;
-        }});
-        /// notify the adapter that the data has changed
-        /// this specifies that the item at selectedFoods.size() - 1 has been inserted
-        /// and the adapter should update the view
-        /// @see FoodsAdapter#notifyItemInserted(int)
-        notifyItemInserted(foodItemCountList.size() - 1);
+        setItems(rows);
     }
 
-    public List<Food> getFoods() {
-        List<Food> foods = new ArrayList<>();
-        for (ItemCount itemCount : foodItemCountList) {
-            for (int i = 0; i < itemCount.quantity; i++) {
-                foods.add(itemCount.food);
-            }
-        }
-        return foods;
-    }
-
-    /// create a view holder for the adapter
-    /// @param parent the parent view group
-    /// @param viewType the type of the view
-    /// @return the view holder
-    /// @see ViewHolder
+    /// Inflate a food row.
+    /// @param parent the RecyclerView
+    /// @param viewType unused, there is one row type
+    /// @return a new view holder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        /// inflate the item_selected_food layout
-        /// @see R.layout.item_selected_food
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_food, parent, false);
         return new ViewHolder(view);
     }
 
-    /// bind the view holder with the data
-    /// @param holder the view holder
-    /// @param position the position of the item in the list
-    /// @see ViewHolder
+    /// Fill a row with the food and quantity at this position.
+    /// @param holder the row to fill
+    /// @param position the row's position in the list
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Food food = foodItemCountList.get(position).food;
-        if (food == null) return;
+        FoodRow row = getItem(position);
+        Food food = row.food;
 
         holder.foodNameTextView.setText(food.getName());
         holder.foodImageView.setImageBitmap(ImageUtil.convertFrom64base(food.getImageBase64()));
-        holder.foodQuantityTextView.setText(String.valueOf(foodItemCountList.get(position).quantity));
-
+        holder.foodQuantityTextView.setText(String.valueOf(row.quantity));
         holder.foodSinglePriceTextView.setText("Single Price: " + String.format("$%.2f", food.getPrice()));
-        holder.foodPriceTextView.setText(String.format("$%.2f", food.getPrice() * foodItemCountList.get(position).quantity));
+        holder.foodPriceTextView.setText(String.format("$%.2f", food.getPrice() * row.quantity));
     }
 
-    /// get the number of items in the list
-    /// @return the number of items in the list
-    @Override
-    public int getItemCount() {
-        return foodItemCountList.size();
-    }
-
-    /// View holder for the foods adapter
-    /// @see RecyclerView.ViewHolder
+    /// Holds the views of one food row.
+    /// @see R.layout#row_food
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final TextView foodNameTextView;
-        public final ImageView foodImageView;
-        public final TextView foodQuantityTextView;
-        public final TextView foodSinglePriceTextView;
-        public final TextView foodPriceTextView;
+        final TextView foodNameTextView;
+        final ImageView foodImageView;
+        final TextView foodQuantityTextView;
+        final TextView foodSinglePriceTextView;
+        final TextView foodPriceTextView;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             foodNameTextView = itemView.findViewById(R.id.food_name_text_view);
             foodImageView = itemView.findViewById(R.id.food_image_view);

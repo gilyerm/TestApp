@@ -59,7 +59,7 @@ public class FoodItemsFragment extends BaseFragment<FoodItemsViewModel> {
         setupRecyclerView(view);
         viewModel.getFoods().observe(getViewLifecycleOwner(), foods -> {
             if (foods != null) {
-                foodsAdapter.addFoods(foods);
+                foodsAdapter.setFoods(foods);
             }
         });
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {

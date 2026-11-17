@@ -74,7 +74,7 @@ public class UsersListFragment extends BaseFragment<UsersListViewModel> {
      */
     private void setupObservers() {
         viewModel.getUsersLiveData().observe(getViewLifecycleOwner(), users -> {
-            userAdapter.setUserList(users);
+            userAdapter.setItems(users);
             tvUserCount.setText("Total users: " + users.size());
         });
         viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), error -> {

@@ -115,12 +115,10 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
                 foodSelector.setText(foods.get(0).getName(), false);
             }
         });
+        viewModel.selectedFoods.observe(getViewLifecycleOwner(), foodsAdapter::setFoods);
         viewModel.cartCreated.observe(getViewLifecycleOwner(), success -> {
             if (success) {
-                int itemCount = foodsAdapter.getFoods().size();
-                foodsAdapter.getFoods().clear();
                 etCartName.setText("");
-                foodsAdapter.notifyItemRangeRemoved(0, itemCount);
                 Toast.makeText(requireContext(), "Cart created successfully", Toast.LENGTH_SHORT).show();
                 navigationHost.goBack();
             }
@@ -140,13 +138,12 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
     public void onClick(View v) {
         if (v.getId() == addButton.getId()) {
             if (_selectedFood != null) {
-                foodsAdapter.addFood(_selectedFood);
+                viewModel.addSelectedFood(_selectedFood);
             }
         } else if (v.getId() == createCartButton.getId()) {
             String cartName = etCartName.getText().toString().trim();
-            List<Food> selectedFoods = new ArrayList<>(foodsAdapter.getFoods());
             String userId = SharedPreferencesUtil.getUserId(requireContext());
-            viewModel.createCart(cartName, selectedFoods, userId);
+            viewModel.createCart(cartName, userId);
         }
     }
 

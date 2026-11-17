@@ -6,42 +6,52 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.testapp.R;
 import com.example.testapp.models.Cart;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/// Adapter for the cart recycler view
-/// @see RecyclerView
+/// Adapter for the carts recycler view.
+/// Each row shows the cart title and how many items it has.
+/// @see BaseAdapter
 /// @see Cart
 /// @see R.layout#row_cart
-public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+public class CartAdapter extends BaseAdapter<Cart, CartAdapter.ViewHolder> {
 
+    /// Callback for clicks on a cart row.
     public interface CartClickListener {
+        /// @param cart the clicked cart
         void onCartClick(Cart cart);
     }
 
-    private final List<Cart> cartList;
+    /// receives row clicks; may be null
+    @Nullable
     private final CartClickListener listener;
 
-    public CartAdapter(CartClickListener listener) {
-        this.cartList = new ArrayList<>();
+    /// @param listener receives row clicks; may be null
+    public CartAdapter(@Nullable CartClickListener listener) {
         this.listener = listener;
     }
 
+    /// Inflate a cart row.
+    /// @param parent the RecyclerView
+    /// @param viewType unused, there is one row type
+    /// @return a new view holder
     @NonNull
     @Override
-    public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_cart, parent, false);
-        return new CartViewHolder(view);
+        return new ViewHolder(view);
     }
 
+    /// Fill a row with the cart at this position and set its click listener.
+    /// @param holder the row to fill
+    /// @param position the cart's position in the list
     @Override
-    public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        Cart cart = cartList.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Cart cart = getItem(position);
+
         holder.cartName.setText(cart.getTitle());
         holder.cartDescription.setText("Total items: " + cart.getFoods().size());
 
@@ -52,46 +62,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         });
     }
 
-    @Override
-    public int getItemCount() {
-        return cartList.size();
-    }
+    /// Holds the views of one cart row.
+    /// @see R.layout#row_cart
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView cartName;
+        final TextView cartDescription;
 
-
-    public List<Cart> getCartList() {
-        return cartList;
-    }
-
-    public void setCartList(List<Cart> carts) {
-        this.cartList.clear();
-        this.cartList.addAll(carts);
-        notifyDataSetChanged();
-    }
-
-    public void addCart(Cart cart) {
-        this.cartList.add(cart);
-        notifyItemInserted(cartList.size() - 1);
-    }
-
-    public void removeCart(int position) {
-        if (position < 0 || position >= cartList.size()) {
-            return;
-        }
-        cartList.remove(position);
-        notifyItemRemoved(position);
-    }
-
-    public void clearCarts() {
-        this.cartList.clear();
-        notifyDataSetChanged();
-    }
-
-
-    static class CartViewHolder extends RecyclerView.ViewHolder {
-        TextView cartName;
-        TextView cartDescription;
-
-        public CartViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             cartName = itemView.findViewById(R.id.tv_item_cart_name);
             cartDescription = itemView.findViewById(R.id.tv_item_cart_description);
