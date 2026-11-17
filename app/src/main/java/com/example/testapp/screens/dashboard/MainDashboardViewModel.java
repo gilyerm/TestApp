@@ -2,16 +2,14 @@ package com.example.testapp.screens.dashboard;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.User;
-import com.example.testapp.services.IDatabaseService;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 /**
  * ViewModel for the main dashboard screen.
  */
-public class MainDashboardViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class MainDashboardViewModel extends BaseViewModel {
     private final MutableLiveData<User> _user = new MutableLiveData<>();
 
     /**
@@ -21,15 +19,6 @@ public class MainDashboardViewModel extends ViewModel {
      */
     public LiveData<User> getUser() {
         return _user;
-    }
-
-    /**
-     * Constructs a MainDashboardViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public MainDashboardViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
     }
 
     /**

@@ -2,19 +2,17 @@ package com.example.testapp.screens.addcart;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.Cart;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
-import com.example.testapp.services.IDatabaseService;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * ViewModel for adding and managing carts.
  */
-public class AddCartViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class AddCartViewModel extends BaseViewModel {
     private final MutableLiveData<List<Food>> _foods = new MutableLiveData<>();
 
     /**
@@ -40,15 +38,6 @@ public class AddCartViewModel extends ViewModel {
      * Kept here (not in the adapter) so the picks survive configuration changes.
      */
     public LiveData<List<Food>> selectedFoods = _selectedFoods;
-
-    /**
-     * Constructs an AddCartViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public AddCartViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Loads all available food items from the database.

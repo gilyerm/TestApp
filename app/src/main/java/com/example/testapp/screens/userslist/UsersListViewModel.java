@@ -2,28 +2,17 @@ package com.example.testapp.screens.userslist;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.User;
-import com.example.testapp.services.IDatabaseService;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 import java.util.List;
 
 /**
  * ViewModel for viewing the list of users.
  */
-public class UsersListViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class UsersListViewModel extends BaseViewModel {
     private final MutableLiveData<List<User>> usersLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
-
-    /**
-     * Constructs a UsersListViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public UsersListViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Gets the LiveData containing the list of users.

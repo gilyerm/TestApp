@@ -57,7 +57,7 @@ An educational example project demonstrating common Android development patterns
 app/src/main/java/com/example/testapp/
 │
 ├── MainActivity.java      # The only Activity — hosts every screen, implements NavigationHost
-├── 📂 core/               # BaseFragment, NavigationHost, ViewModelFactory
+├── 📂 core/               # BaseFragment, BaseViewModel, NavigationHost
 ├── 📂 screens/            # One folder per screen: <Name>Fragment + <Name>ViewModel
 ├── 📂 models/             # Data entities: User, Food, Cart (+ Identifiable)
 ├── 📂 services/           # Data-access interfaces + DatabaseService
@@ -65,7 +65,7 @@ app/src/main/java/com/example/testapp/
 │       ├── 📂 firestore/  # Cloud Firestore implementations (default)
 │       └── 📂 rtdb/       # Realtime Database implementations
 ├── 📂 adapters/           # RecyclerView / list adapters
-└── 📂 utils/              # Validator, ImageUtil, SharedPreferencesUtil
+└── 📂 utils/              # Validator, ImageUtil, ImagePicker, SharedPreferencesUtil
 ```
 
 Each folder has its own `README.md` with details.
@@ -113,7 +113,7 @@ The app uses a **Single Activity Architecture** with **MVVM**. `MainActivity` is
 │  screens/<name>/<Name>Fragment               │  ← View: renders UI, observes LiveData
 │  screens/<name>/<Name>ViewModel              │  ← state + logic, exposes LiveData
 ├──────────────────────────────────────────────┤
-│  core/ViewModelFactory                       │  ← injects IDatabaseService into ViewModels
+│  core/BaseViewModel                          │  ← gives ViewModels the IDatabaseService
 ├──────────────────────────────────────────────┤
 │  services/  IDatabaseService → IUser/IFood/ICartService
 │  services/impl/firestore  |  services/impl/rtdb
@@ -125,12 +125,12 @@ The app uses a **Single Activity Architecture** with **MVVM**. `MainActivity` is
 | Layer | Responsibility |
 |-------|---------------|
 | **MainActivity** | Hosts fragments, owns the toolbar, implements `NavigationHost` (`navigateTo`, `goBack`, title, back button) |
-| **core** | `BaseFragment` (gets the `NavigationHost`, sets title/back button), `ViewModelFactory` (dependency injection) |
+| **core** | `BaseFragment` (gets the `NavigationHost`, sets title/back button), `BaseViewModel` (gives ViewModels `databaseService`) |
 | **screens** | Fragment = View, ViewModel = state and calls to services |
 | **services** | Async CRUD interfaces with callbacks; Firestore and Realtime DB implementations |
 | **models** | Entities stored in the database |
 | **adapters** | Display lists of carts, foods, and users |
-| **utils** | Input validation, image conversion, local session storage |
+| **utils** | Input validation, image conversion and picking, local session storage |
 
 **Data flow:** Fragment calls a ViewModel method → ViewModel calls a service with a `DatabaseCallback` → callback updates `MutableLiveData` → Fragment's observer updates the UI.
 
@@ -153,8 +153,8 @@ Splash ──(logged in)──────────────────�
 
 ## ➕ Adding a New Screen
 
-1. Create `screens/<name>/` with `<Name>Fragment` and `<Name>ViewModel` (skip the ViewModel if the screen has no data or logic; then use `BaseFragment<ViewModel>` and skip step 4 — see `landing/`).
-2. Make the ViewModel extend `ViewModel` and take **one** constructor argument: `IDatabaseService`.
+1. Create `screens/<name>/` with `<Name>Fragment` and `<Name>ViewModel` (skip the ViewModel if the screen has no data or logic; then use `BaseFragment<BaseViewModel>` and skip steps 2 and 4 — see `landing/`).
+2. Make the ViewModel extend `BaseViewModel` (no constructor needed; use the inherited `databaseService` field).
 3. Make the Fragment extend `BaseFragment<<Name>ViewModel>`, implement `getTitle()`, and override `shouldShowBackButton()` if it is a root screen.
 4. Assign the inherited `viewModel` field: `viewModel = getViewModel(<Name>ViewModel.class);`.
 5. Add a layout `res/layout/fragment_<name>.xml`.

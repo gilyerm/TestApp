@@ -2,7 +2,7 @@
 
 > Database access layer: interfaces for each entity, plus `DatabaseService`, which picks the backend.
 
-ViewModels only use these **interfaces** (given to them by `ViewModelFactory`), so they work with either backend.
+ViewModels only use these **interfaces** (given to them by `BaseViewModel`), so they work with either backend.
 
 ## Interfaces
 
@@ -34,7 +34,7 @@ Singleton that implements `IDatabaseService` and creates the Cloud Firestore ser
 
 | Member | Description |
 |:-------|:------------|
-| `getInstance()` | Returns the shared instance (used by `ViewModelFactory`) |
+| `getInstance()` | Returns the shared instance (used by `BaseViewModel`) |
 
 ## Implementations
 

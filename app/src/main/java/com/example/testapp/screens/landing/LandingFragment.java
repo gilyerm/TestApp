@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.screens.login.LoginFragment;
@@ -17,7 +17,7 @@ import com.example.testapp.screens.register.RegisterFragment;
  * LandingFragment represents the landing screen of the application.
  * It provides users with options to either log in or register.
  */
-public class LandingFragment extends BaseFragment<ViewModel> {
+public class LandingFragment extends BaseFragment<BaseViewModel> {
     private Button btnLogin, btnRegister;
 
     /**

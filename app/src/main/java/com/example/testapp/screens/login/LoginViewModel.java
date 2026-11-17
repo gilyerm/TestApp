@@ -3,16 +3,14 @@ package com.example.testapp.screens.login;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.User;
-import com.example.testapp.services.IDatabaseService;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 /**
  * ViewModel for handling user login.
  */
-public class LoginViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class LoginViewModel extends BaseViewModel {
     private final MutableLiveData<User> _loginSuccess = new MutableLiveData<>();
 
     /**
@@ -33,15 +31,6 @@ public class LoginViewModel extends ViewModel {
      */
     public LiveData<String> getLoginError() {
         return _loginError;
-    }
-
-    /**
-     * Constructs a LoginViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public LoginViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
     }
 
     /**

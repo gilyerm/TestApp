@@ -2,17 +2,15 @@ package com.example.testapp.screens.mycarts;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.Cart;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
-import com.example.testapp.services.IDatabaseService;
 import java.util.List;
 
 /**
  * ViewModel for viewing the user's carts.
  */
-public class MyCartsViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class MyCartsViewModel extends BaseViewModel {
     private final MutableLiveData<List<Cart>> _carts = new MutableLiveData<>();
 
     /**
@@ -31,15 +29,6 @@ public class MyCartsViewModel extends ViewModel {
      * LiveData containing any error messages.
      */
     public LiveData<String> error = _error;
-
-    /**
-     * Constructs a MyCartsViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public MyCartsViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Loads the carts associated with the specified user.

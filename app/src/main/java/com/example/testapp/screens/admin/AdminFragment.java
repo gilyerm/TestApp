@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.screens.allcarts.AllCartsFragment;
@@ -17,7 +17,7 @@ import com.example.testapp.screens.userslist.UsersListFragment;
  * AdminFragment is responsible for displaying the admin dashboard.
  * It provides navigation to users, foods, and carts management.
  */
-public class AdminFragment extends BaseFragment<ViewModel> {
+public class AdminFragment extends BaseFragment<BaseViewModel> {
 
     /**
      * Returns the title of the fragment.

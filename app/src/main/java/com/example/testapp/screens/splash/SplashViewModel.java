@@ -4,13 +4,12 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-import com.example.testapp.services.IDatabaseService;
+import com.example.testapp.core.BaseViewModel;
 
 /**
  * ViewModel for the splash screen.
  */
-public class SplashViewModel extends ViewModel {
+public class SplashViewModel extends BaseViewModel {
     /// runs the splash timer on the main thread
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final MutableLiveData<Boolean> _navigateToLanding = new MutableLiveData<>();
@@ -33,14 +32,6 @@ public class SplashViewModel extends ViewModel {
      */
     public LiveData<Boolean> getNavigateToMain() {
         return _navigateToMain;
-    }
-
-    /**
-     * Constructs a SplashViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public SplashViewModel(IDatabaseService databaseService) {
     }
 
     /**

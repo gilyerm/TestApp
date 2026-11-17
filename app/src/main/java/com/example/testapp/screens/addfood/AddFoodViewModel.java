@@ -2,27 +2,16 @@ package com.example.testapp.screens.addfood;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
-import com.example.testapp.services.IDatabaseService;
 
 /**
  * ViewModel for adding new food items.
  */
-public class AddFoodViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class AddFoodViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> foodAddedSuccessfully = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
-
-    /**
-     * Constructs an AddFoodViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public AddFoodViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Gets the LiveData indicating if the food was added successfully.

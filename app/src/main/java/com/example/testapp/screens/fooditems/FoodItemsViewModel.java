@@ -2,28 +2,17 @@ package com.example.testapp.screens.fooditems;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.Food;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
-import com.example.testapp.services.IDatabaseService;
 import java.util.List;
 
 /**
  * ViewModel for managing and viewing food items.
  */
-public class FoodItemsViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class FoodItemsViewModel extends BaseViewModel {
     private final MutableLiveData<List<Food>> foods = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
-
-    /**
-     * Constructs a FoodItemsViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public FoodItemsViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Gets the LiveData containing the list of food items.

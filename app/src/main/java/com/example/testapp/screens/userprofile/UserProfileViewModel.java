@@ -2,9 +2,8 @@ package com.example.testapp.screens.userprofile;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.User;
-import com.example.testapp.services.IDatabaseService;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 import androidx.annotation.Nullable;
 import java.util.function.UnaryOperator;
@@ -12,20 +11,10 @@ import java.util.function.UnaryOperator;
 /**
  * ViewModel for managing and viewing the user's profile.
  */
-public class UserProfileViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class UserProfileViewModel extends BaseViewModel {
     private final MutableLiveData<User> userLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> updateSuccessLiveData = new MutableLiveData<>();
-
-    /**
-     * Constructs a UserProfileViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public UserProfileViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
 
     /**
      * Gets the LiveData containing the user's profile details.

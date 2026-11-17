@@ -6,7 +6,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 /**
@@ -15,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
  *
  * @param <T> the ViewModel type of the screen.
  */
-public abstract class BaseFragment<T extends ViewModel> extends Fragment {
+public abstract class BaseFragment<T extends BaseViewModel> extends Fragment {
 
     /**
      * The navigation host for managing fragment navigation.
@@ -69,14 +68,14 @@ public abstract class BaseFragment<T extends ViewModel> extends Fragment {
     }
 
     /**
-     * Returns the ViewModel of the given class for this fragment, created with {@link ViewModelFactory}.
+     * Returns the ViewModel of the given class for this fragment, created by the default ViewModelProvider.
      *
      * @param modelClass the ViewModel class, e.g. {@code LoginViewModel.class}
      * @return the ViewModel instance (the same one is returned again after a configuration change)
      */
     @NonNull
     protected T getViewModel(@NonNull Class<T> modelClass) {
-        return new ViewModelProvider(this, new ViewModelFactory()).get(modelClass);
+        return new ViewModelProvider(this).get(modelClass);
     }
 
     /**

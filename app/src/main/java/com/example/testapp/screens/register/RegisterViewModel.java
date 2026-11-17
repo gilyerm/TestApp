@@ -2,16 +2,14 @@ package com.example.testapp.screens.register;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import com.example.testapp.core.BaseViewModel;
 import com.example.testapp.models.User;
-import com.example.testapp.services.IDatabaseService;
 import com.example.testapp.services.ICrudService.DatabaseCallback;
 
 /**
  * ViewModel for handling user registration.
  */
-public class RegisterViewModel extends ViewModel {
-    private final IDatabaseService databaseService;
+public class RegisterViewModel extends BaseViewModel {
     private final MutableLiveData<User> _registerSuccess = new MutableLiveData<>();
 
     /**
@@ -32,15 +30,6 @@ public class RegisterViewModel extends ViewModel {
      */
     public LiveData<String> getRegisterError() {
         return _registerError;
-    }
-
-    /**
-     * Constructs a RegisterViewModel with the given database service.
-     *
-     * @param databaseService the service used for database operations
-     */
-    public RegisterViewModel(IDatabaseService databaseService) {
-        this.databaseService = databaseService;
     }
 
     /**

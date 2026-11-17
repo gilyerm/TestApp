@@ -14,7 +14,7 @@ The app uses a **Single Activity Architecture** with **MVVM**. `MainActivity` is
 
 | Package | Contents |
 |:--------|:---------|
-| [`core/`](core/) | Infrastructure: `BaseFragment`, `NavigationHost`, `ViewModelFactory` |
+| [`core/`](core/) | Infrastructure: `BaseFragment`, `NavigationHost`, `BaseViewModel` |
 | [`screens/`](screens/) | One folder per screen, each with a Fragment and a ViewModel |
 | [`models/`](models/) | Data entities: `User`, `Food`, `Cart`, and helpers |
 | [`services/`](services/) | Database access interfaces, `DatabaseService`, and backend implementations |
