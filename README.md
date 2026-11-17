@@ -9,7 +9,7 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%26%20Realtime%20DB-yellow?logo=firebase)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An educational example project demonstrating common Android development patterns — **Single Activity + MVVM** architecture, fragment navigation, authentication, CRUD operations, and a swappable Firebase backend (Cloud Firestore or Realtime Database).
+An educational example project demonstrating common Android development patterns — **Single Activity + MVVM** architecture, fragment navigation, authentication, CRUD operations, and a Cloud Firestore backend (with Realtime Database implementations included as an alternative).
 
 ---
 
@@ -37,7 +37,7 @@ An educational example project demonstrating common Android development patterns
 | 🍕 Food Management | Add food items with a name, price, and photo |
 | 🛡️ Admin Panel | Browse all users, all food items, and all carts |
 | 📷 Images | Camera / gallery picker; images stored as base64 (WEBP) |
-| ☁️ Cloud Database | Cloud Firestore (default) or Firebase Realtime Database |
+| ☁️ Cloud Database | Cloud Firestore (Realtime Database implementations included) |
 
 ## 🛠️ Tech Stack
 
@@ -60,7 +60,7 @@ app/src/main/java/com/example/testapp/
 ├── 📂 core/               # BaseFragment, NavigationHost, ViewModelFactory
 ├── 📂 screens/            # One folder per screen: <Name>Fragment + <Name>ViewModel
 ├── 📂 models/             # Data entities: User, Food, Cart (+ Identifiable)
-├── 📂 services/           # Data-access interfaces + DatabaseService backend switcher
+├── 📂 services/           # Data-access interfaces + DatabaseService
 │   └── 📂 impl/
 │       ├── 📂 firestore/  # Cloud Firestore implementations (default)
 │       └── 📂 rtdb/       # Realtime Database implementations
@@ -164,10 +164,12 @@ No manifest change is needed — only `MainActivity` is declared.
 
 ## 🔀 Switching the Database Backend
 
-Cloud Firestore is the default. To use Realtime Database, call this before anything uses the database (for example at the start of `MainActivity.onCreate`):
+The app uses Cloud Firestore. To use Realtime Database instead, change the three lines in the `DatabaseService` constructor:
 
 ```java
-DatabaseService.setBackend(DatabaseService.DatabaseBackend.REALTIME_DATABASE);
+this.userService = new UserFirebaseServiceImpl();
+this.foodService = new FoodFirebaseServiceImpl();
+this.cartService = new CartFirebaseServiceImpl();
 ```
 
 Both backends use the same paths/collections: `users`, `foods`, `carts`.

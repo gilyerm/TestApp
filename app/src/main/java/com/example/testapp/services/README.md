@@ -30,20 +30,17 @@ For `create`, `delete`, and `update` the callback may be `null`.
 
 ## `DatabaseService`
 
-Singleton that implements `IDatabaseService` and creates the services for the selected backend.
+Singleton that implements `IDatabaseService` and creates the Cloud Firestore services.
 
 | Member | Description |
 |:-------|:------------|
 | `getInstance()` | Returns the shared instance (used by `ViewModelFactory`) |
-| `setBackend(DatabaseBackend)` | Changes the backend and resets the instance; call it before the database is first used |
-| `getBackend()` | Returns the current backend |
-| `DatabaseBackend` | `FIRESTORE` (default) or `REALTIME_DATABASE` |
 
 ## Implementations
 
 | Backend | Folder |
 |:--------|:-------|
-| Cloud Firestore (default) | [`impl/firestore/`](impl/firestore/) |
-| Firebase Realtime Database | [`impl/rtdb/`](impl/rtdb/) |
+| Cloud Firestore (used) | [`impl/firestore/`](impl/firestore/) |
+| Firebase Realtime Database (alternative) | [`impl/rtdb/`](impl/rtdb/) |
 
 Both backends use the same names: `users`, `foods`, `carts`.

@@ -2,7 +2,7 @@
 
 > Firebase Realtime Database implementations of the service interfaces.
 
-To use this backend instead of Firestore, call `DatabaseService.setBackend(DatabaseService.DatabaseBackend.REALTIME_DATABASE)` before the database is first used.
+These are not used by default. To use this backend instead of Firestore, create these classes in the `DatabaseService` constructor instead of the Firestore ones.
 
 | Class | Implements | Path | Description |
 |:------|:-----------|:-----|:------------|
@@ -21,4 +21,4 @@ public class OrderFirebaseServiceImpl extends FirebaseService<Order> implements 
 }
 ```
 
-Then return it from `DatabaseService` for the `REALTIME_DATABASE` backend. Subclasses can use `getTableReference()` to write their own queries.
+Then create it in the `DatabaseService` constructor. Subclasses can use `getTableReference()` to write their own queries.
