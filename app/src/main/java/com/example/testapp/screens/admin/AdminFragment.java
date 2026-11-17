@@ -66,8 +66,23 @@ public class AdminFragment extends BaseFragment<ViewModel> {
         View cardUsers = view.findViewById(R.id.card_users);
         View cardFoods = view.findViewById(R.id.card_foods);
         View cardCarts = view.findViewById(R.id.card_carts);
-        cardUsers.setOnClickListener(v -> navigationHost.navigateTo(new UsersListFragment(), true));
-        cardFoods.setOnClickListener(v -> navigationHost.navigateTo(new FoodItemsFragment(), true));
-        cardCarts.setOnClickListener(v -> navigationHost.navigateTo(new AllCartsFragment(), true));
+        cardUsers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new UsersListFragment(), true);
+            }
+        });
+        cardFoods.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new FoodItemsFragment(), true);
+            }
+        });
+        cardCarts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new AllCartsFragment(), true);
+            }
+        });
     }
 }

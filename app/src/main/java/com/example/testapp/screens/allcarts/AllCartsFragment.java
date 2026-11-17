@@ -13,6 +13,9 @@ import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.screens.cartdetail.CartDetailFragment;
+import androidx.lifecycle.Observer;
+import java.util.List;
+import com.example.testapp.models.Cart;
 
 /**
  * AllCartsFragment displays a list of all available carts from the database.
@@ -35,12 +38,15 @@ public class AllCartsFragment extends BaseFragment<AllCartsViewModel> {
         View view = inflater.inflate(R.layout.fragment_all_carts, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_carts);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        cartAdapter = new CartAdapter(cart -> {
-            CartDetailFragment fragment = new CartDetailFragment();
-            Bundle args = new Bundle();
-            args.putString("cart_id", cart.getId());
-            fragment.setArguments(args);
-            navigationHost.navigateTo(fragment, true);
+        cartAdapter = new CartAdapter(new CartAdapter.CartClickListener() {
+            @Override
+            public void onCartClick(Cart cart) {
+                CartDetailFragment fragment = new CartDetailFragment();
+                Bundle args = new Bundle();
+                args.putString("cart_id", cart.getId());
+                fragment.setArguments(args);
+                navigationHost.navigateTo(fragment, true);
+            }
         });
         recyclerView.setAdapter(cartAdapter);
         return view;
@@ -56,11 +62,17 @@ public class AllCartsFragment extends BaseFragment<AllCartsViewModel> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(AllCartsViewModel.class);
-        viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
-            cartAdapter.setItems(carts);
+        viewModel.carts.observe(getViewLifecycleOwner(), new Observer<List<Cart>>() {
+            @Override
+            public void onChanged(List<Cart> carts) {
+                cartAdapter.setItems(carts);
+            }
         });
-        viewModel.error.observe(getViewLifecycleOwner(), errorMsg -> {
-            Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+        viewModel.error.observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String errorMsg) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+            }
         });
         viewModel.loadAllCarts();
     }

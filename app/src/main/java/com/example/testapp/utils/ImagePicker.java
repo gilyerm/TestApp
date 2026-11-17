@@ -17,6 +17,8 @@ import com.example.testapp.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.function.Supplier;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 
 /// Lets the user pick an image from the gallery or take one with the camera, and shows it in an ImageView.
 /// Create it in the fragment's `onCreate` (activity result launchers must be registered before the fragment starts),
@@ -39,17 +41,23 @@ public class ImagePicker {
     /// @param onPicked runs after the picked image is shown in the target
     public ImagePicker(@NonNull Fragment fragment, @NonNull Supplier<ImageView> target, @NonNull Runnable onPicked) {
         this.fragment = fragment;
-        galleryLauncher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                target.get().setImageURI(result.getData().getData());
-                onPicked.run();
+        galleryLauncher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    target.get().setImageURI(result.getData().getData());
+                    onPicked.run();
+                }
             }
         });
-        cameraLauncher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                Bitmap bitmap = (Bitmap) result.getData().getExtras().get("data");
-                target.get().setImageBitmap(bitmap);
-                onPicked.run();
+        cameraLauncher = fragment.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Bitmap bitmap = (Bitmap) result.getData().getExtras().get("data");
+                    target.get().setImageBitmap(bitmap);
+                    onPicked.run();
+                }
             }
         });
     }
@@ -61,10 +69,20 @@ public class ImagePicker {
         dialog.setContentView(sheet);
         setupRow(sheet.findViewById(R.id.option_gallery), dialog, R.string.gallery_title, R.string.gallery_description,
                 R.drawable.gallery_thumbnail,
-                () -> galleryLauncher.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)));
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        galleryLauncher.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI));
+                    }
+                });
         setupRow(sheet.findViewById(R.id.option_camera), dialog, R.string.camera_title, R.string.camera_description,
                 R.drawable.photo_camera,
-                () -> cameraLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        cameraLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE));
+                    }
+                });
         dialog.show();
     }
 
@@ -73,9 +91,12 @@ public class ImagePicker {
         ((ImageView) row.findViewById(R.id.icon_dialog_item)).setImageResource(iconRes);
         ((TextView) row.findViewById(R.id.text_dialog_item)).setText(titleRes);
         ((TextView) row.findViewById(R.id.text_dialog_item_description)).setText(descriptionRes);
-        row.setOnClickListener(v -> {
-            dialog.dismiss();
-            action.run();
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                action.run();
+            }
         });
     }
 }

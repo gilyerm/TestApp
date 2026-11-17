@@ -16,12 +16,14 @@ import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.screens.register.RegisterFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
+import androidx.lifecycle.Observer;
+import com.example.testapp.models.User;
 
 /**
  * LoginFragment handles the user authentication process.
  * It provides fields for email and password input and handles login and registration actions.
  */
-public class LoginFragment extends BaseFragment<LoginViewModel> implements View.OnClickListener {
+public class LoginFragment extends BaseFragment<LoginViewModel> {
     private static final String TAG = "LoginFragment";
     private EditText etEmail, etPassword;
     private Button btnLogin;
@@ -76,41 +78,50 @@ public class LoginFragment extends BaseFragment<LoginViewModel> implements View.
         etPassword = view.findViewById(R.id.et_login_password);
         btnLogin = view.findViewById(R.id.btn_login_login);
         tvRegister = view.findViewById(R.id.tv_login_register);
-        btnLogin.setOnClickListener(this);
-        tvRegister.setOnClickListener(this);
-        viewModel.getLoginSuccess().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                Log.d(TAG, "User logged in: " + user.toString());
-                SharedPreferencesUtil.saveUser(requireContext(), user);
-                navigationHost.navigateTo(new MainDashboardFragment(), false);
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginUser();
             }
         });
-        viewModel.getLoginError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                etPassword.setError(error);
-                etPassword.requestFocus();
-                SharedPreferencesUtil.signOutUser(requireContext());
+        tvRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new RegisterFragment(), true);
+            }
+        });
+        viewModel.getLoginSuccess().observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if (user != null) {
+                    Log.d(TAG, "User logged in: " + user.toString());
+                    SharedPreferencesUtil.saveUser(requireContext(), user);
+                    navigationHost.navigateTo(new MainDashboardFragment(), false);
+                }
+            }
+        });
+        viewModel.getLoginError().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                if (error != null) {
+                    etPassword.setError(error);
+                    etPassword.requestFocus();
+                    SharedPreferencesUtil.signOutUser(requireContext());
+                }
             }
         });
     }
 
     /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
+     * Validates the input fields and logs the user in via the ViewModel.
      */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == btnLogin.getId()) {
-            String email = etEmail.getText().toString();
-            String password = etPassword.getText().toString();
-            if (!checkInput(email, password)) {
-                return;
-            }
-            viewModel.loginUser(email, password);
-        } else if (v.getId() == tvRegister.getId()) {
-            navigationHost.navigateTo(new RegisterFragment(), true);
+    private void loginUser() {
+        String email = etEmail.getText().toString();
+        String password = etPassword.getText().toString();
+        if (!checkInput(email, password)) {
+            return;
         }
+        viewModel.loginUser(email, password);
     }
 
     /**

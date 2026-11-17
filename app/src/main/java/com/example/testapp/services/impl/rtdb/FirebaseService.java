@@ -19,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import java.util.function.Consumer;
 
 /// Generic Firebase Realtime Database implementation of {@link ICrudService}.
 /// Provides all CRUD operations for a given table and entity type.
@@ -55,57 +58,72 @@ public class FirebaseService<T extends Identifiable> implements ICrudService<T> 
     /// {@inheritDoc}
     @Override
     public final void create(@NotNull T item, @Nullable ICrudService.DatabaseCallback<Void> callback) {
-        tableReference.child(item.getId()).setValue(item, (error, ref) -> {
-            if (callback == null) return;
-            if (error != null) callback.onFailed(error.toException());
-            else callback.onCompleted(null);
+        tableReference.child(item.getId()).setValue(item, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (callback == null) return;
+                if (error != null) callback.onFailed(error.toException());
+                else callback.onCompleted(null);
+            }
         });
     }
 
     /// {@inheritDoc}
     @Override
     public final void getById(@NotNull String id, @NotNull ICrudService.DatabaseCallback<T> callback) {
-        tableReference.child(id).get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
-                callback.onFailed(task.getException());
-                return;
+        tableReference.child(id).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e(TAG, "Error getting data", task.getException());
+                    callback.onFailed(task.getException());
+                    return;
+                }
+                DataSnapshot snapshot = task.getResult();
+                callback.onCompleted(snapshot != null ? snapshot.getValue(clazz) : null);
             }
-            DataSnapshot snapshot = task.getResult();
-            callback.onCompleted(snapshot != null ? snapshot.getValue(clazz) : null);
         });
     }
 
     /// {@inheritDoc}
     @Override
     public final void getAll(@NotNull ICrudService.DatabaseCallback<List<T>> callback) {
-        tableReference.get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting data", task.getException());
-                callback.onFailed(task.getException());
-                return;
+        tableReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Log.e(TAG, "Error getting data", task.getException());
+                    callback.onFailed(task.getException());
+                    return;
+                }
+                List<T> list = new ArrayList<>();
+                DataSnapshot snapshot = task.getResult();
+                if (snapshot != null) {
+                    snapshot.getChildren().forEach(new Consumer<DataSnapshot>() {
+                        @Override
+                        public void accept(DataSnapshot snap) {
+                            T item = snap.getValue(clazz);
+                            if (item != null) {
+                                list.add(item);
+                            }
+                        }
+                    });
+                }
+                callback.onCompleted(list);
             }
-            List<T> list = new ArrayList<>();
-            DataSnapshot snapshot = task.getResult();
-            if (snapshot != null) {
-                snapshot.getChildren().forEach(snap -> {
-                    T item = snap.getValue(clazz);
-                    if (item != null) {
-                        list.add(item);
-                    }
-                });
-            }
-            callback.onCompleted(list);
         });
     }
 
     /// {@inheritDoc}
     @Override
     public final void delete(@NotNull String id, @Nullable DatabaseCallback<Void> callback) {
-        tableReference.child(id).removeValue((error, ref) -> {
-            if (callback == null) return;
-            if (error != null) callback.onFailed(error.toException());
-            else callback.onCompleted(null);
+        tableReference.child(id).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (callback == null) return;
+                if (error != null) callback.onFailed(error.toException());
+                else callback.onCompleted(null);
+            }
         });
     }
 

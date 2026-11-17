@@ -15,6 +15,8 @@ import com.example.testapp.screens.mycarts.MyCartsFragment;
 import com.example.testapp.screens.userprofile.UserProfileFragment;
 import com.example.testapp.screens.admin.AdminFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
+import androidx.lifecycle.Observer;
+import com.example.testapp.models.User;
 
 /**
  * MainDashboardFragment represents the main landing dashboard for authenticated users.
@@ -74,16 +76,44 @@ public class MainDashboardFragment extends BaseFragment<MainDashboardViewModel> 
         Button btnEditProfile = view.findViewById(R.id.btn_main_edit_profile);
         Button btnToAdmin = view.findViewById(R.id.btn_main_to_admin);
         adminCard = view.findViewById(R.id.admin_card);
-        btnAddFood.setOnClickListener(v -> navigationHost.navigateTo(new AddFoodFragment(), true));
-        btnAddCart.setOnClickListener(v -> navigationHost.navigateTo(new AddCartFragment(), true));
-        btnMyCarts.setOnClickListener(v -> navigationHost.navigateTo(new MyCartsFragment(), true));
-        btnEditProfile.setOnClickListener(v -> navigationHost.navigateTo(new UserProfileFragment(), true));
-        btnToAdmin.setOnClickListener(v -> navigationHost.navigateTo(new AdminFragment(), true));
-        viewModel.getUser().observe(getViewLifecycleOwner(), user -> {
-            if (user != null && user.isAdmin()) {
-                adminCard.setVisibility(View.VISIBLE);
-            } else {
-                adminCard.setVisibility(View.GONE);
+        btnAddFood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new AddFoodFragment(), true);
+            }
+        });
+        btnAddCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new AddCartFragment(), true);
+            }
+        });
+        btnMyCarts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new MyCartsFragment(), true);
+            }
+        });
+        btnEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new UserProfileFragment(), true);
+            }
+        });
+        btnToAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new AdminFragment(), true);
+            }
+        });
+        viewModel.getUser().observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if (user != null && user.isAdmin()) {
+                    adminCard.setVisibility(View.VISIBLE);
+                } else {
+                    adminCard.setVisibility(View.GONE);
+                }
             }
         });
         String userId = SharedPreferencesUtil.getUserId(requireContext());

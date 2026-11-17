@@ -7,6 +7,9 @@ import com.google.firebase.database.DataSnapshot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
 
 /// Firebase Realtime Database implementation of {@link IUserService}.
 /// Inherits all CRUD operations from {@link FirebaseService} for the "users" table.
@@ -26,22 +29,25 @@ public class UserFirebaseServiceImpl extends FirebaseService<User> implements IU
                 .equalTo(email)
                 .limitToFirst(1)
                 .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        callback.onFailed(task.getException());
-                        return;
-                    }
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot != null && snapshot.exists()) {
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            User user = child.getValue(User.class);
-                            if (user != null && Objects.equals(user.getPassword(), password)) {
-                                callback.onCompleted(user);
-                                return;
+                .addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        if (!task.isSuccessful()) {
+                            callback.onFailed(task.getException());
+                            return;
+                        }
+                        DataSnapshot snapshot = task.getResult();
+                        if (snapshot != null && snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                User user = child.getValue(User.class);
+                                if (user != null && Objects.equals(user.getPassword(), password)) {
+                                    callback.onCompleted(user);
+                                    return;
+                                }
                             }
                         }
+                        callback.onCompleted(null);
                     }
-                    callback.onCompleted(null);
                 });
     }
 
@@ -54,13 +60,16 @@ public class UserFirebaseServiceImpl extends FirebaseService<User> implements IU
                 .equalTo(email)
                 .limitToFirst(1)
                 .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        callback.onFailed(task.getException());
-                        return;
+                .addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        if (!task.isSuccessful()) {
+                            callback.onFailed(task.getException());
+                            return;
+                        }
+                        DataSnapshot snapshot = task.getResult();
+                        callback.onCompleted(snapshot != null && snapshot.exists() && snapshot.hasChildren());
                     }
-                    DataSnapshot snapshot = task.getResult();
-                    callback.onCompleted(snapshot != null && snapshot.exists() && snapshot.hasChildren());
                 });
     }
 }

@@ -12,6 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
+import androidx.lifecycle.Observer;
+import java.util.List;
+import com.example.testapp.models.Food;
 
 /**
  * FoodItemsFragment displays a list of all available food items.
@@ -57,14 +60,20 @@ public class FoodItemsFragment extends BaseFragment<FoodItemsViewModel> {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(FoodItemsViewModel.class);
         setupRecyclerView(view);
-        viewModel.getFoods().observe(getViewLifecycleOwner(), foods -> {
-            if (foods != null) {
-                foodsAdapter.setFoods(foods);
+        viewModel.getFoods().observe(getViewLifecycleOwner(), new Observer<List<Food>>() {
+            @Override
+            public void onChanged(List<Food> foods) {
+                if (foods != null) {
+                    foodsAdapter.setFoods(foods);
+                }
             }
         });
-        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                if (error != null) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
             }
         });
         viewModel.loadFoods();

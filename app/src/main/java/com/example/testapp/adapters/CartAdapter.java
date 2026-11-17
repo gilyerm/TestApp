@@ -55,9 +55,12 @@ public class CartAdapter extends BaseAdapter<Cart, CartAdapter.ViewHolder> {
         holder.cartName.setText(cart.getTitle());
         holder.cartDescription.setText("Total items: " + cart.getFoods().size());
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCartClick(cart);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onCartClick(cart);
+                }
             }
         });
     }

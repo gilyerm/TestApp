@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
 
 /// Firebase Realtime Database implementation of {@link ICartService}.
 /// Inherits all CRUD operations from {@link FirebaseService} for the "carts" table.
@@ -26,22 +29,25 @@ public class CartFirebaseServiceImpl extends FirebaseService<Cart> implements IC
                 .orderByChild("uid")
                 .equalTo(uid)
                 .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        callback.onFailed(task.getException());
-                        return;
-                    }
-                    List<Cart> carts = new ArrayList<>();
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot != null && snapshot.exists()) {
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            Cart cart = child.getValue(Cart.class);
-                            if (cart != null) {
-                                carts.add(cart);
+                .addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        if (!task.isSuccessful()) {
+                            callback.onFailed(task.getException());
+                            return;
+                        }
+                        List<Cart> carts = new ArrayList<>();
+                        DataSnapshot snapshot = task.getResult();
+                        if (snapshot != null && snapshot.exists()) {
+                            for (DataSnapshot child : snapshot.getChildren()) {
+                                Cart cart = child.getValue(Cart.class);
+                                if (cart != null) {
+                                    carts.add(cart);
+                                }
                             }
                         }
+                        callback.onCompleted(carts);
                     }
-                    callback.onCompleted(carts);
                 });
     }
 }

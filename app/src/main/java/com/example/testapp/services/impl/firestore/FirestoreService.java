@@ -16,6 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import androidx.annotation.NonNull;
 
 /// Generic Cloud Firestore implementation of {@link ICrudService}.
 /// Provides all CRUD operations for a given collection and entity type.
@@ -56,12 +62,18 @@ public class FirestoreService<T extends Identifiable> implements ICrudService<T>
     public final void create(@NotNull T item, @Nullable DatabaseCallback<Void> callback) {
         collectionReference.document(item.getId())
                 .set(item)
-                .addOnSuccessListener(aVoid -> {
-                    if (callback != null) callback.onCompleted(null);
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        if (callback != null) callback.onCompleted(null);
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error creating document in " + collectionName, e);
-                    if (callback != null) callback.onFailed(e);
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error creating document in " + collectionName, e);
+                        if (callback != null) callback.onFailed(e);
+                    }
                 });
     }
 
@@ -70,16 +82,22 @@ public class FirestoreService<T extends Identifiable> implements ICrudService<T>
     public final void getById(@NotNull String id, @NotNull DatabaseCallback<T> callback) {
         collectionReference.document(id)
                 .get()
-                .addOnSuccessListener(snapshot -> {
-                    if (snapshot.exists()) {
-                        callback.onCompleted(snapshot.toObject(clazz));
-                    } else {
-                        callback.onCompleted(null);
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            callback.onCompleted(snapshot.toObject(clazz));
+                        } else {
+                            callback.onCompleted(null);
+                        }
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting document from " + collectionName, e);
-                    callback.onFailed(e);
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error getting document from " + collectionName, e);
+                        callback.onFailed(e);
+                    }
                 });
     }
 
@@ -87,19 +105,25 @@ public class FirestoreService<T extends Identifiable> implements ICrudService<T>
     @Override
     public final void getAll(@NotNull DatabaseCallback<List<T>> callback) {
         collectionReference.get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<T> list = new ArrayList<>();
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        T item = doc.toObject(clazz);
-                        if (item != null) {
-                            list.add(item);
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot querySnapshot) {
+                        List<T> list = new ArrayList<>();
+                        for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                            T item = doc.toObject(clazz);
+                            if (item != null) {
+                                list.add(item);
+                            }
                         }
+                        callback.onCompleted(list);
                     }
-                    callback.onCompleted(list);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting all documents from " + collectionName, e);
-                    callback.onFailed(e);
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error getting all documents from " + collectionName, e);
+                        callback.onFailed(e);
+                    }
                 });
     }
 
@@ -108,12 +132,18 @@ public class FirestoreService<T extends Identifiable> implements ICrudService<T>
     public final void delete(@NotNull String id, @Nullable DatabaseCallback<Void> callback) {
         collectionReference.document(id)
                 .delete()
-                .addOnSuccessListener(aVoid -> {
-                    if (callback != null) callback.onCompleted(null);
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        if (callback != null) callback.onCompleted(null);
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error deleting document from " + collectionName, e);
-                    if (callback != null) callback.onFailed(e);
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error deleting document from " + collectionName, e);
+                        if (callback != null) callback.onFailed(e);
+                    }
                 });
     }
 
@@ -121,20 +151,29 @@ public class FirestoreService<T extends Identifiable> implements ICrudService<T>
     @Override
     public void update(@NotNull String id, @NotNull UnaryOperator<T> function, @Nullable DatabaseCallback<Void> callback) {
         DocumentReference docRef = collectionReference.document(id);
-        db.runTransaction(transaction -> {
-            DocumentSnapshot snapshot = transaction.get(docRef);
-            T current = snapshot.toObject(clazz);
-            if (current != null) {
-                T updated = function.apply(current);
-                transaction.set(docRef, updated);
-                return updated;
+        db.runTransaction(new Transaction.Function<T>() {
+            @Override
+            public T apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot snapshot = transaction.get(docRef);
+                T current = snapshot.toObject(clazz);
+                if (current != null) {
+                    T updated = function.apply(current);
+                    transaction.set(docRef, updated);
+                    return updated;
+                }
+                return null;
             }
-            return null;
-        }).addOnSuccessListener(result -> {
-            if (callback != null) callback.onCompleted(null);
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Transaction failed in " + collectionName, e);
-            if (callback != null) callback.onFailed(e);
+        }).addOnSuccessListener(new OnSuccessListener<T>() {
+            @Override
+            public void onSuccess(T result) {
+                if (callback != null) callback.onCompleted(null);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Transaction failed in " + collectionName, e);
+                if (callback != null) callback.onFailed(e);
+            }
         });
     }
 

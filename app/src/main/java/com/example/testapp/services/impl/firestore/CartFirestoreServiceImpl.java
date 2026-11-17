@@ -10,6 +10,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.firestore.QuerySnapshot;
+import androidx.annotation.NonNull;
 
 /// Cloud Firestore implementation of {@link ICartService}.
 /// Inherits all CRUD operations from {@link FirestoreService} for the "carts" collection.
@@ -31,19 +35,25 @@ public class CartFirestoreServiceImpl extends FirestoreService<Cart> implements 
         getCollectionReference()
                 .whereEqualTo("uid", uid)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<Cart> carts = new ArrayList<>();
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        Cart cart = doc.toObject(Cart.class);
-                        if (cart != null) {
-                            carts.add(cart);
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot querySnapshot) {
+                        List<Cart> carts = new ArrayList<>();
+                        for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                            Cart cart = doc.toObject(Cart.class);
+                            if (cart != null) {
+                                carts.add(cart);
+                            }
                         }
+                        callback.onCompleted(carts);
                     }
-                    callback.onCompleted(carts);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error fetching carts for user: " + uid, e);
-                    callback.onFailed(e);
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error fetching carts for user: " + uid, e);
+                        callback.onFailed(e);
+                    }
                 });
     }
 }

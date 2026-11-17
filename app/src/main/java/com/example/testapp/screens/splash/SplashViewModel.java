@@ -1,5 +1,7 @@
 package com.example.testapp.screens.splash;
 
+import android.os.Handler;
+import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -9,6 +11,8 @@ import com.example.testapp.services.IDatabaseService;
  * ViewModel for the splash screen.
  */
 public class SplashViewModel extends ViewModel {
+    /// runs the splash timer on the main thread
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final MutableLiveData<Boolean> _navigateToLanding = new MutableLiveData<>();
 
     /**
@@ -45,17 +49,25 @@ public class SplashViewModel extends ViewModel {
      * @param isUserLoggedIn true if the user is already logged in, false otherwise
      */
     public void startSplashTimer(boolean isUserLoggedIn) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ignored) {
-            } finally {
+        // drop a timer still pending from an earlier call, so navigation fires only once
+        handler.removeCallbacksAndMessages(null);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
                 if (isUserLoggedIn) {
-                    _navigateToMain.postValue(true);
+                    _navigateToMain.setValue(true);
                 } else {
-                    _navigateToLanding.postValue(true);
+                    _navigateToLanding.setValue(true);
                 }
             }
-        }).start();
+        }, 3000);
+    }
+
+    /**
+     * Cancels the pending timer when the ViewModel is destroyed.
+     */
+    @Override
+    protected void onCleared() {
+        handler.removeCallbacksAndMessages(null);
     }
 }

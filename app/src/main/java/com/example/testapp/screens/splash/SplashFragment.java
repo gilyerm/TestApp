@@ -11,6 +11,7 @@ import com.example.testapp.core.BaseFragment;
 import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.screens.landing.LandingFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
+import androidx.lifecycle.Observer;
 
 /**
  * SplashFragment represents the initial splash screen of the application.
@@ -63,11 +64,17 @@ public class SplashFragment extends BaseFragment<SplashViewModel> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(SplashViewModel.class);
-        viewModel.getNavigateToLanding().observe(getViewLifecycleOwner(), navigate -> {
-            if (navigate != null && navigate) navigationHost.navigateTo(new LandingFragment(), false);
+        viewModel.getNavigateToLanding().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean navigate) {
+                if (navigate != null && navigate) navigationHost.navigateTo(new LandingFragment(), false);
+            }
         });
-        viewModel.getNavigateToMain().observe(getViewLifecycleOwner(), navigate -> {
-            if (navigate != null && navigate) navigationHost.navigateTo(new MainDashboardFragment(), false);
+        viewModel.getNavigateToMain().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean navigate) {
+                if (navigate != null && navigate) navigationHost.navigateTo(new MainDashboardFragment(), false);
+            }
         });
         viewModel.startSplashTimer(SharedPreferencesUtil.isUserLoggedIn(requireContext()));
     }

@@ -86,17 +86,23 @@ public class UserAdapter extends BaseAdapter<User, UserAdapter.ViewHolder> {
             holder.chipRole.setVisibility(View.GONE);
         }
 
-        holder.itemView.setOnClickListener(v -> {
-            if (onUserClickListener != null) {
-                onUserClickListener.onUserClick(user);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onUserClickListener != null) {
+                    onUserClickListener.onUserClick(user);
+                }
             }
         });
 
-        holder.itemView.setOnLongClickListener(v -> {
-            if (onUserClickListener != null) {
-                onUserClickListener.onLongUserClick(user);
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (onUserClickListener != null) {
+                    onUserClickListener.onLongUserClick(user);
+                }
+                return true;
             }
-            return true;
         });
     }
 

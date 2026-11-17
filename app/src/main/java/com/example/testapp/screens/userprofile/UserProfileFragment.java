@@ -21,6 +21,8 @@ import com.example.testapp.utils.ImageUtil;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
 import com.example.testapp.screens.landing.LandingFragment;
+import androidx.lifecycle.Observer;
+import java.util.function.Supplier;
 
 /**
  * UserProfileFragment displays and manages a user's profile information.
@@ -28,7 +30,7 @@ import com.example.testapp.screens.landing.LandingFragment;
  * Tapping the picture (own profile only) opens the gallery / camera picker; the new picture is saved with the other
  * fields when "Update profile" is pressed.
  */
-public class UserProfileFragment extends BaseFragment<UserProfileViewModel> implements View.OnClickListener {
+public class UserProfileFragment extends BaseFragment<UserProfileViewModel> {
     private static final String TAG = "UserProfileFragment";
     private static final String ARG_USER_UID = "USER_UID";
     private EditText etUserFirstName, etUserLastName, etUserEmail, etUserPhone, etUserPassword;
@@ -77,8 +79,17 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        imagePicker = new ImagePicker(this, () -> ivProfileImage,
-                () -> pendingImageBase64 = ImageUtil.convertTo64Base(ivProfileImage));
+        imagePicker = new ImagePicker(this, new Supplier<ImageView>() {
+            @Override
+            public ImageView get() {
+                return ivProfileImage;
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                pendingImageBase64 = ImageUtil.convertTo64Base(ivProfileImage);
+            }
+        });
     }
 
     /**
@@ -122,10 +133,25 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
         adminBadge = view.findViewById(R.id.admin_badge);
         ivProfileImage = view.findViewById(R.id.iv_user_profile_image);
         if (isCurrentUser) {
-            ivProfileImage.setOnClickListener(this);
+            ivProfileImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    imagePicker.show();
+                }
+            });
         }
-        btnUpdateProfile.setOnClickListener(this);
-        btnSignOut.setOnClickListener(this);
+        btnUpdateProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUserProfile();
+            }
+        });
+        btnSignOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signOut();
+            }
+        });
         if (!isCurrentUser) {
             btnSignOut.setVisibility(View.GONE);
         }
@@ -139,67 +165,60 @@ public class UserProfileFragment extends BaseFragment<UserProfileViewModel> impl
      * Sets up Observers for the ViewModel data.
      */
     private void setupObservers() {
-        viewModel.getUserLiveData().observe(getViewLifecycleOwner(), user -> {
-            selectedUser = user;
-            etUserFirstName.setText(user.getFirstName());
-            etUserLastName.setText(user.getLastName());
-            etUserEmail.setText(user.getEmail());
-            etUserPhone.setText(user.getPhone());
-            etUserPassword.setText(user.getPassword());
-            String displayName = user.getFirstName() + " " + user.getLastName();
-            tvUserDisplayName.setText(displayName);
-            tvUserDisplayEmail.setText(user.getEmail());
-            if (pendingImageBase64 == null) {
-                Bitmap image = ImageUtil.convertFrom64base(user.getImageBase64());
-                if (image != null) {
-                    ivProfileImage.setImageBitmap(image);
+        viewModel.getUserLiveData().observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                selectedUser = user;
+                etUserFirstName.setText(user.getFirstName());
+                etUserLastName.setText(user.getLastName());
+                etUserEmail.setText(user.getEmail());
+                etUserPhone.setText(user.getPhone());
+                etUserPassword.setText(user.getPassword());
+                String displayName = user.getFirstName() + " " + user.getLastName();
+                tvUserDisplayName.setText(displayName);
+                tvUserDisplayEmail.setText(user.getEmail());
+                if (pendingImageBase64 == null) {
+                    Bitmap image = ImageUtil.convertFrom64base(user.getImageBase64());
+                    if (image != null) {
+                        ivProfileImage.setImageBitmap(image);
+                    } else {
+                        ivProfileImage.setImageResource(R.drawable.ic_launcher);
+                    }
+                }
+                if (user.isAdmin()) {
+                    adminBadge.setVisibility(View.VISIBLE);
                 } else {
-                    ivProfileImage.setImageResource(R.drawable.ic_launcher);
+                    adminBadge.setVisibility(View.GONE);
+                }
+                if (!isCurrentUser) {
+                    etUserEmail.setEnabled(false);
+                    etUserPassword.setEnabled(false);
+                } else {
+                    etUserEmail.setEnabled(true);
+                    etUserPassword.setEnabled(true);
+                    btnUpdateProfile.setVisibility(View.VISIBLE);
                 }
             }
-            if (user.isAdmin()) {
-                adminBadge.setVisibility(View.VISIBLE);
-            } else {
-                adminBadge.setVisibility(View.GONE);
-            }
-            if (!isCurrentUser) {
-                etUserEmail.setEnabled(false);
-                etUserPassword.setEnabled(false);
-            } else {
-                etUserEmail.setEnabled(true);
-                etUserPassword.setEnabled(true);
-                btnUpdateProfile.setVisibility(View.VISIBLE);
+        });
+        viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                if (error.equals("User profile not found")) {
+                    navigationHost.goBack();
+                }
             }
         });
-        viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), error -> {
-            Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-            if (error.equals("User profile not found")) {
-                navigationHost.goBack();
+        viewModel.getUpdateSuccessLiveData().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean success) {
+                if (Boolean.TRUE.equals(success)) {
+                    Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                    pendingImageBase64 = null;
+                    viewModel.loadUser(selectedUid);
+                }
             }
         });
-        viewModel.getUpdateSuccessLiveData().observe(getViewLifecycleOwner(), success -> {
-            if (Boolean.TRUE.equals(success)) {
-                Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-                pendingImageBase64 = null;
-                viewModel.loadUser(selectedUid);
-            }
-        });
-    }
-
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.btn_edit_profile) {
-            updateUserProfile();
-        } else if(v.getId() == R.id.btn_sign_out) {
-            signOut();
-        } else if(v.getId() == R.id.iv_user_profile_image) {
-            imagePicker.show();
-        }
     }
 
     /**

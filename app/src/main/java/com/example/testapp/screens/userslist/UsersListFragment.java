@@ -16,6 +16,8 @@ import com.example.testapp.adapters.UserAdapter;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.models.User;
 import com.example.testapp.screens.userprofile.UserProfileFragment;
+import androidx.lifecycle.Observer;
+import java.util.List;
 
 /**
  * UsersListFragment displays a list of users for administrators.
@@ -73,13 +75,19 @@ public class UsersListFragment extends BaseFragment<UsersListViewModel> {
      * Sets up Observers for the ViewModel data.
      */
     private void setupObservers() {
-        viewModel.getUsersLiveData().observe(getViewLifecycleOwner(), users -> {
-            userAdapter.setItems(users);
-            tvUserCount.setText("Total users: " + users.size());
+        viewModel.getUsersLiveData().observe(getViewLifecycleOwner(), new Observer<List<User>>() {
+            @Override
+            public void onChanged(List<User> users) {
+                userAdapter.setItems(users);
+                tvUserCount.setText("Total users: " + users.size());
+            }
         });
-        viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), error -> {
-            Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-            Log.e(TAG, error);
+        viewModel.getErrorLiveData().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, error);
+            }
         });
     }
 

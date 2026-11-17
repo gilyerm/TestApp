@@ -1,6 +1,7 @@
 package com.example.testapp.screens.cartdetail;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.models.Cart;
 import java.util.Locale;
+import androidx.lifecycle.Observer;
 
 /**
  * CartDetailFragment displays the details of a specific cart.
@@ -58,23 +60,28 @@ public class CartDetailFragment extends BaseFragment<CartDetailViewModel> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(CartDetailViewModel.class);
-        String cartId = null;
-        if (getArguments() != null) {
-            cartId = getArguments().getString("cart_id");
-        }
+        Bundle args = getArguments();
+        String cartId = args != null ? args.getString("cart_id") : null;
         if (cartId == null) {
+            Log.e("CartDetailFragment", "Missing cart_id argument");
             Toast.makeText(requireContext(), "Cart ID not found", Toast.LENGTH_SHORT).show();
             navigationHost.goBack();
             return;
         }
         viewModel.cart.observe(getViewLifecycleOwner(), this::setCartView);
-        viewModel.isLoading.observe(getViewLifecycleOwner(), loading -> {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
-            rvCartItems.setVisibility(loading ? View.GONE : View.VISIBLE);
+        viewModel.isLoading.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isLoading) {
+                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                rvCartItems.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+            }
         });
-        viewModel.error.observe(getViewLifecycleOwner(), errorMsg -> {
-            Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
-            navigationHost.goBack();
+        viewModel.error.observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String errorMsg) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+                navigationHost.goBack();
+            }
         });
         viewModel.loadCart(cartId);
     }

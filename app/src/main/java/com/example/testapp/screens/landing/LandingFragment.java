@@ -17,7 +17,7 @@ import com.example.testapp.screens.register.RegisterFragment;
  * LandingFragment represents the landing screen of the application.
  * It provides users with options to either log in or register.
  */
-public class LandingFragment extends BaseFragment<ViewModel> implements View.OnClickListener {
+public class LandingFragment extends BaseFragment<ViewModel> {
     private Button btnLogin, btnRegister;
 
     /**
@@ -66,21 +66,17 @@ public class LandingFragment extends BaseFragment<ViewModel> implements View.OnC
         super.onViewCreated(view, savedInstanceState);
         btnLogin = view.findViewById(R.id.btn_landing_login);
         btnRegister = view.findViewById(R.id.btn_landing_register);
-        btnLogin.setOnClickListener(this);
-        btnRegister.setOnClickListener(this);
-    }
-
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == btnLogin.getId()) {
-            navigationHost.navigateTo(new LoginFragment(), true);
-        } else if (v.getId() == btnRegister.getId()) {
-            navigationHost.navigateTo(new RegisterFragment(), true);
-        }
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new LoginFragment(), true);
+            }
+        });
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new RegisterFragment(), true);
+            }
+        });
     }
 }

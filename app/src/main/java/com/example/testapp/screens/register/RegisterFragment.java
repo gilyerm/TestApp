@@ -16,12 +16,14 @@ import com.example.testapp.core.BaseFragment;
 import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
+import androidx.lifecycle.Observer;
+import com.example.testapp.models.User;
 
 /**
  * RegisterFragment handles new user registration.
  * It provides input fields for user details and registers them through the ViewModel.
  */
-public class RegisterFragment extends BaseFragment<RegisterViewModel> implements View.OnClickListener {
+public class RegisterFragment extends BaseFragment<RegisterViewModel> {
     private static final String TAG = "RegisterFragment";
     private EditText etEmail, etPassword, etFName, etLName, etPhone;
     private Button btnRegister;
@@ -79,44 +81,53 @@ public class RegisterFragment extends BaseFragment<RegisterViewModel> implements
         etPhone = view.findViewById(R.id.et_register_phone);
         btnRegister = view.findViewById(R.id.btn_register_register);
         tvLogin = view.findViewById(R.id.tv_register_login);
-        btnRegister.setOnClickListener(this);
-        tvLogin.setOnClickListener(this);
-        viewModel.getRegisterSuccess().observe(getViewLifecycleOwner(), user -> {
-            if (user != null) {
-                SharedPreferencesUtil.saveUser(requireContext(), user);
-                navigationHost.navigateTo(new MainDashboardFragment(), false);
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registerUser();
             }
         });
-        viewModel.getRegisterError().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
-                if (error.equals("Failed to register user")) {
-                    SharedPreferencesUtil.signOutUser(requireContext());
+        tvLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.goBack();
+            }
+        });
+        viewModel.getRegisterSuccess().observe(getViewLifecycleOwner(), new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if (user != null) {
+                    SharedPreferencesUtil.saveUser(requireContext(), user);
+                    navigationHost.navigateTo(new MainDashboardFragment(), false);
+                }
+            }
+        });
+        viewModel.getRegisterError().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                if (error != null) {
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+                    if (error.equals("Failed to register user")) {
+                        SharedPreferencesUtil.signOutUser(requireContext());
+                    }
                 }
             }
         });
     }
 
     /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
+     * Validates the input fields and registers the user via the ViewModel.
      */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == btnRegister.getId()) {
-            String email = etEmail.getText().toString();
-            String password = etPassword.getText().toString();
-            String fName = etFName.getText().toString();
-            String lName = etLName.getText().toString();
-            String phone = etPhone.getText().toString();
-            if (!checkInput(email, password, fName, lName, phone)) {
-                return;
-            }
-            viewModel.registerUser(email, password, fName, lName, phone);
-        } else if (v.getId() == tvLogin.getId()) {
-            navigationHost.goBack();
+    private void registerUser() {
+        String email = etEmail.getText().toString();
+        String password = etPassword.getText().toString();
+        String fName = etFName.getText().toString();
+        String lName = etLName.getText().toString();
+        String phone = etPhone.getText().toString();
+        if (!checkInput(email, password, fName, lName, phone)) {
+            return;
         }
+        viewModel.registerUser(email, password, fName, lName, phone);
     }
 
     /**

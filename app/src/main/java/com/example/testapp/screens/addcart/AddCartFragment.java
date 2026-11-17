@@ -24,12 +24,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import androidx.lifecycle.Observer;
+import android.widget.AdapterView;
 
 /**
  * AddCartFragment provides a user interface for creating a new cart.
  * Users can select foods, add them to the cart, and name the cart.
  */
-public class AddCartFragment extends BaseFragment<AddCartViewModel> implements View.OnClickListener {
+public class AddCartFragment extends BaseFragment<AddCartViewModel> {
     private static final String TAG = "AddCartFragment";
     private AutoCompleteTextView foodSelector;
     private Button createCartButton;
@@ -84,16 +86,31 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
             }
         };
         foodSelector.setAdapter(foodDropdownAdapter);
-        foodSelector.setOnItemClickListener((parent, v, position, id) -> {
-            Food selectedFood = (Food) parent.getItemAtPosition(position);
-            if (selectedFood != null) {
-                Log.d(TAG, "Selected food: " + selectedFood.getName());
-                _selectedFood = selectedFood;
-                foodSelector.setText(selectedFood.getName(), false);
+        foodSelector.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Food selectedFood = (Food) parent.getItemAtPosition(position);
+                if (selectedFood != null) {
+                    Log.d(TAG, "Selected food: " + selectedFood.getName());
+                    _selectedFood = selectedFood;
+                    foodSelector.setText(selectedFood.getName(), false);
+                }
             }
         });
-        addButton.setOnClickListener(this);
-        createCartButton.setOnClickListener(this);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (_selectedFood != null) {
+                    viewModel.addSelectedFood(_selectedFood);
+                }
+            }
+        });
+        createCartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createCart();
+            }
+        });
         return view;
     }
 
@@ -107,45 +124,50 @@ public class AddCartFragment extends BaseFragment<AddCartViewModel> implements V
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(AddCartViewModel.class);
-        viewModel.foods.observe(getViewLifecycleOwner(), foods -> {
-            allFoods.clear();
-            allFoods.addAll(foods);
-            foodDropdownAdapter.notifyDataSetChanged();
-            if (!foods.isEmpty()) {
-                _selectedFood = foods.get(0);
-                foodSelector.setText(foods.get(0).getName(), false);
+        viewModel.foods.observe(getViewLifecycleOwner(), new Observer<List<Food>>() {
+            @Override
+            public void onChanged(List<Food> foods) {
+                allFoods.clear();
+                allFoods.addAll(foods);
+                foodDropdownAdapter.notifyDataSetChanged();
+                if (!foods.isEmpty()) {
+                    _selectedFood = foods.get(0);
+                    foodSelector.setText(foods.get(0).getName(), false);
+                }
             }
         });
-        viewModel.selectedFoods.observe(getViewLifecycleOwner(), foodsAdapter::setFoods);
-        viewModel.cartCreated.observe(getViewLifecycleOwner(), success -> {
-            if (success) {
-                etCartName.setText("");
-                Toast.makeText(requireContext(), "Cart created successfully", Toast.LENGTH_SHORT).show();
-                navigationHost.goBack();
+        viewModel.selectedFoods.observe(getViewLifecycleOwner(), new Observer<List<Food>>() {
+            @Override
+            public void onChanged(List<Food> foods) {
+                foodsAdapter.setFoods(foods);
             }
         });
-        viewModel.error.observe(getViewLifecycleOwner(), errorMsg -> {
-            Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+        viewModel.cartCreated.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean success) {
+                if (success) {
+                    etCartName.setText("");
+                    Toast.makeText(requireContext(), "Cart created successfully", Toast.LENGTH_SHORT).show();
+                    navigationHost.goBack();
+                }
+            }
+        });
+        viewModel.error.observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String errorMsg) {
+                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_SHORT).show();
+            }
         });
         viewModel.loadFoods();
     }
 
     /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
+     * Creates a cart with the entered name for the current user via the ViewModel.
      */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == addButton.getId()) {
-            if (_selectedFood != null) {
-                viewModel.addSelectedFood(_selectedFood);
-            }
-        } else if (v.getId() == createCartButton.getId()) {
-            String cartName = etCartName.getText().toString().trim();
-            String userId = SharedPreferencesUtil.getUserId(requireContext());
-            viewModel.createCart(cartName, userId);
-        }
+    private void createCart() {
+        String cartName = etCartName.getText().toString().trim();
+        String userId = SharedPreferencesUtil.getUserId(requireContext());
+        viewModel.createCart(cartName, userId);
     }
 
     /**

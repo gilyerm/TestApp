@@ -17,6 +17,9 @@ import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.screens.addcart.AddCartFragment;
 import com.example.testapp.screens.cartdetail.CartDetailFragment;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import androidx.lifecycle.Observer;
+import java.util.List;
+import com.example.testapp.models.Cart;
 
 /**
  * MyCartsFragment displays a list of carts created by the currently logged-in user.
@@ -46,13 +49,21 @@ public class MyCartsFragment extends BaseFragment<MyCartsViewModel> {
         progressBar = view.findViewById(R.id.my_cart_progress_bar);
         emptyStateLayout = view.findViewById(R.id.empty_state);
         fabAddCart = view.findViewById(R.id.fab_add_cart);
-        fabAddCart.setOnClickListener(v -> navigationHost.navigateTo(new AddCartFragment(), true));
-        cartAdapter = new CartAdapter(cart -> {
-            CartDetailFragment fragment = new CartDetailFragment();
-            Bundle args = new Bundle();
-            args.putString("cart_id", cart.getId());
-            fragment.setArguments(args);
-            navigationHost.navigateTo(fragment, true);
+        fabAddCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                navigationHost.navigateTo(new AddCartFragment(), true);
+            }
+        });
+        cartAdapter = new CartAdapter(new CartAdapter.CartClickListener() {
+            @Override
+            public void onCartClick(Cart cart) {
+                CartDetailFragment fragment = new CartDetailFragment();
+                Bundle args = new Bundle();
+                args.putString("cart_id", cart.getId());
+                fragment.setArguments(args);
+                navigationHost.navigateTo(fragment, true);
+            }
         });
         recyclerView.setAdapter(cartAdapter);
         return view;
@@ -68,18 +79,24 @@ public class MyCartsFragment extends BaseFragment<MyCartsViewModel> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel(MyCartsViewModel.class);
-        viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
-            cartAdapter.setItems(carts);
-            if (carts.isEmpty()) {
-                recyclerView.setVisibility(View.GONE);
-                emptyStateLayout.setVisibility(View.VISIBLE);
-            } else {
-                recyclerView.setVisibility(View.VISIBLE);
-                emptyStateLayout.setVisibility(View.GONE);
+        viewModel.carts.observe(getViewLifecycleOwner(), new Observer<List<Cart>>() {
+            @Override
+            public void onChanged(List<Cart> carts) {
+                cartAdapter.setItems(carts);
+                if (carts.isEmpty()) {
+                    recyclerView.setVisibility(View.GONE);
+                    emptyStateLayout.setVisibility(View.VISIBLE);
+                } else {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    emptyStateLayout.setVisibility(View.GONE);
+                }
             }
         });
-        viewModel.isLoading.observe(getViewLifecycleOwner(), loading -> {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        viewModel.isLoading.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean loading) {
+                progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+            }
         });
         viewModel.loadCarts(SharedPreferencesUtil.getUserId(requireContext()));
     }

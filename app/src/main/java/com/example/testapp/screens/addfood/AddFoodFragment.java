@@ -14,12 +14,14 @@ import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
 import com.example.testapp.utils.ImagePicker;
 import com.example.testapp.utils.ImageUtil;
+import androidx.lifecycle.Observer;
+import java.util.function.Supplier;
 
 /**
  * AddFoodFragment provides the user interface for adding new food items.
  * It handles image selection (gallery or camera) and food detail inputs.
  */
-public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements View.OnClickListener {
+public class AddFoodFragment extends BaseFragment<AddFoodViewModel> {
     private static final String TAG = "AddFoodFragment";
     private EditText foodNameEditText, foodPriceEditText;
     private Button addFoodButton;
@@ -45,7 +47,17 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        imagePicker = new ImagePicker(this, () -> foodImageView, () -> foodImageView.setTag(null));
+        imagePicker = new ImagePicker(this, new Supplier<ImageView>() {
+            @Override
+            public ImageView get() {
+                return foodImageView;
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                foodImageView.setTag(null);
+            }
+        });
     }
 
     /**
@@ -77,36 +89,38 @@ public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements V
         addFoodButton = view.findViewById(R.id.add_food_button);
         foodImageView = view.findViewById(R.id.food_image);
         foodImageView.setTag(R.drawable.image);
-        foodImageView.setOnClickListener(this);
-        addFoodButton.setOnClickListener(this);
-        viewModel.getFoodAddedSuccessfully().observe(getViewLifecycleOwner(), success -> {
-            if (success != null && success) {
-                Toast.makeText(getContext(), "Food added successfully", Toast.LENGTH_SHORT).show();
-                foodNameEditText.setText("");
-                foodPriceEditText.setText("");
-                foodImageView.setImageBitmap(null);
-                foodImageView.setTag(R.drawable.image);
+        foodImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imagePicker.show();
             }
         });
-        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), error -> {
-            if (error != null) {
-                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        addFoodButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addFoodToDatabase();
             }
         });
-    }
-
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == addFoodButton.getId()) {
-            addFoodToDatabase();
-        } else if (v.getId() == foodImageView.getId()) {
-            imagePicker.show();
-        }
+        viewModel.getFoodAddedSuccessfully().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean success) {
+                if (success != null && success) {
+                    Toast.makeText(getContext(), "Food added successfully", Toast.LENGTH_SHORT).show();
+                    foodNameEditText.setText("");
+                    foodPriceEditText.setText("");
+                    foodImageView.setImageBitmap(null);
+                    foodImageView.setTag(R.drawable.image);
+                }
+            }
+        });
+        viewModel.getErrorMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String error) {
+                if (error != null) {
+                    Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     /**
