@@ -15,8 +15,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.testapp.core.NavigationHost;
 import com.example.testapp.screens.splash.SplashFragment;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import android.view.View;
 
 /**
  * Main activity that serves as the entry point for the application.
@@ -37,13 +35,10 @@ public class MainActivity extends AppCompatActivity implements NavigationHost {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), new OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
