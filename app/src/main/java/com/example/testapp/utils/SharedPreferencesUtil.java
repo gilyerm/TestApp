@@ -14,9 +14,17 @@ import com.google.gson.Gson;
 /// @see SharedPreferences
 public class SharedPreferencesUtil {
 
-    /// The name of the shared preferences file
+    /// Suffix of the shared preferences file name; the app's package name is put before it
+    private static final String PREF_FILE_SUFFIX = ".PREFERENCE_FILE_KEY";
+
+    /// Get the app's shared preferences file, named `<package name>.PREFERENCE_FILE_KEY`
+    /// (the naming Android recommends), so the name follows the app ID instead of being hardcoded.
+    /// @param context The context to use
+    /// @return The app's private shared preferences
     /// @see Context#getSharedPreferences(String, int)
-    private static final String PREF_NAME = "com.example.testapp.PREFERENCE_FILE_KEY";
+    private static SharedPreferences getPrefs(Context context) {
+        return context.getSharedPreferences(context.getPackageName() + PREF_FILE_SUFFIX, Context.MODE_PRIVATE);
+    }
 
     /// Save a string to shared preferences
     /// @param context The context to use
@@ -24,7 +32,7 @@ public class SharedPreferencesUtil {
     /// @param value The string to save
     /// @see SharedPreferences.Editor#putString(String, String)
     private static void saveString(Context context, String key, String value) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, value);
         editor.apply();
@@ -37,7 +45,7 @@ public class SharedPreferencesUtil {
     /// @return The string value stored in shared preferences
     /// @see SharedPreferences#getString(String, String)
     private static String getString(Context context, String key, String defaultValue) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         return sharedPreferences.getString(key, defaultValue);
     }
 
@@ -47,7 +55,7 @@ public class SharedPreferencesUtil {
     /// @param value The integer to save
     /// @see SharedPreferences.Editor#putInt(String, int)
     private static void saveInt(Context context, String key, int value) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(key, value);
         editor.apply();
@@ -60,7 +68,7 @@ public class SharedPreferencesUtil {
     /// @return The integer value stored in shared preferences
     /// @see SharedPreferences#getInt(String, int)
     private static int getInt(Context context, String key, int defaultValue) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         return sharedPreferences.getInt(key, defaultValue);
     }
 
@@ -70,7 +78,7 @@ public class SharedPreferencesUtil {
     /// @param context The context to use
     /// @see SharedPreferences.Editor#clear()
     public static void clear(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
@@ -81,7 +89,7 @@ public class SharedPreferencesUtil {
     /// @param key The key to remove
     /// @see SharedPreferences.Editor#remove(String)
     private static void remove(Context context, String key) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(key);
         editor.apply();
@@ -93,7 +101,7 @@ public class SharedPreferencesUtil {
     /// @return true if the key exists, false otherwise
     /// @see SharedPreferences#contains(String)
     private static boolean contains(Context context, String key) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getPrefs(context);
         return sharedPreferences.contains(key);
     }
 
