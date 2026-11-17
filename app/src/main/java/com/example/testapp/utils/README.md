@@ -34,8 +34,14 @@ Bottom sheet to pick an image from the gallery or take one with the camera; show
 | `show()` | Opens the gallery / camera bottom sheet |
 
 ```java
-imagePicker = new ImagePicker(this, () -> imageView, () -> imageChanged = true);
-imageView.setOnClickListener(v -> imagePicker.show());
+imagePicker = new ImagePicker(this, new Supplier<ImageView>() {
+    @Override public ImageView get() { return imageView; }
+}, new Runnable() {
+    @Override public void run() { imageChanged = true; }
+});
+imageView.setOnClickListener(new View.OnClickListener() {
+    @Override public void onClick(View v) { imagePicker.show(); }
+});
 ```
 
 ## `SharedPreferencesUtil`

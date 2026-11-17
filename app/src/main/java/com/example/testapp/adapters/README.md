@@ -52,6 +52,11 @@ public class FooAdapter extends BaseAdapter<Foo, FooAdapter.ViewHolder> {
 
 ```java
 // Fragment
-viewModel.selectedFoods.observe(getViewLifecycleOwner(), foodsAdapter::setFoods);
-addButton.setOnClickListener(v -> viewModel.addSelectedFood(food)); // change state in the ViewModel, not the adapter
+viewModel.selectedFoods.observe(getViewLifecycleOwner(), new Observer<List<Food>>() {
+    @Override public void onChanged(List<Food> foods) { foodsAdapter.setFoods(foods); }
+});
+addButton.setOnClickListener(new View.OnClickListener() {
+    // change state in the ViewModel, not the adapter
+    @Override public void onClick(View v) { viewModel.addSelectedFood(food); }
+});
 ```

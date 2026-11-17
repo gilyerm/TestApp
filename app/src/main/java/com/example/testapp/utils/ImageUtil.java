@@ -18,8 +18,9 @@ import java.io.ByteArrayOutputStream;
 /// and throws `SecurityException` if the user denied it.
 public class ImageUtil {
 
-    /// Longest side, in pixels, of an image before it is saved.
-    /// Keeps a food document well under Firestore's 1 MiB limit and the list fast to scroll.
+    /// Max width or height, in pixels, of a saved image.
+    /// The image is stored as base64 inside its document, so it must stay small:
+    /// Firestore caps a document at 1 MiB, and big images make lists slow to scroll.
     private static final int MAX_IMAGE_SIZE = 512;
 
     /// Convert an ImageView image to a WebP base64 string, scaled down to at most {@link #MAX_IMAGE_SIZE} pixels per side

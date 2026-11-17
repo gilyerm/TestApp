@@ -19,4 +19,4 @@ public class OrderFirestoreServiceImpl extends FirestoreService<Order> implement
 }
 ```
 
-Then return it from `DatabaseService` for the `FIRESTORE` backend. Subclasses can use `getCollectionReference()` to write their own queries.
+Then create it in the `DatabaseService` constructor. Subclasses can use `getCollectionReference()` to write their own queries.
