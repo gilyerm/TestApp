@@ -15,6 +15,9 @@
 
 - implement `Identifiable` (so the CRUD services can find them by ID) and `Serializable`;
 - have a **public no-argument constructor** and getters/setters — Firebase needs these to convert documents to objects;
-- override `equals` / `hashCode` / `toString`.
+- override `equals` / `hashCode` / `toString`. **`equals` compares only the ID**, so an edited copy of an object is still "equal" to the original;
+- keep the image out of `toString` (base64 is too long to log).
+
+**Every public `getX()` is saved as a field.** Firebase serializes getters, so `Cart.getTotalPrice()` is also stored as `totalPrice` and `User.getFullName()` as `fullName`. Annotate a computed getter with `@Exclude` if it should not be stored.
 
 Follow the same rules when adding a new entity.
