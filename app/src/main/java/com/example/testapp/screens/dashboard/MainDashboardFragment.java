@@ -7,10 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.addfood.AddFoodFragment;
 import com.example.testapp.screens.addcart.AddCartFragment;
 import com.example.testapp.screens.mycarts.MyCartsFragment;
@@ -22,8 +20,7 @@ import com.example.testapp.utils.SharedPreferencesUtil;
  * MainDashboardFragment represents the main landing dashboard for authenticated users.
  * Provides navigation options to add foods, manage carts, edit profile, and an admin panel (if authorized).
  */
-public class MainDashboardFragment extends BaseFragment {
-    private MainDashboardViewModel viewModel;
+public class MainDashboardFragment extends BaseFragment<MainDashboardViewModel> {
     private View adminCard;
 
     /**
@@ -31,6 +28,7 @@ public class MainDashboardFragment extends BaseFragment {
      *
      * @return the title string for the Dashboard screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Dashboard";
@@ -69,8 +67,7 @@ public class MainDashboardFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ViewModelFactory factory = new ViewModelFactory();
-        viewModel = new ViewModelProvider(this, factory).get(MainDashboardViewModel.class);
+        viewModel = getViewModel(MainDashboardViewModel.class);
         Button btnAddFood = view.findViewById(R.id.btn_main_add_food);
         Button btnAddCart = view.findViewById(R.id.btn_main_add_cart);
         Button btnMyCarts = view.findViewById(R.id.btn_main_my_carts);

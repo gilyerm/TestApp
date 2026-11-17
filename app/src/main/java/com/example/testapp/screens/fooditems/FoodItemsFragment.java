@@ -7,28 +7,26 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 
 /**
  * FoodItemsFragment displays a list of all available food items.
  */
-public class FoodItemsFragment extends BaseFragment {
+public class FoodItemsFragment extends BaseFragment<FoodItemsViewModel> {
     private static final String TAG = "FoodItemsFragment";
     private RecyclerView recyclerView;
     private FoodsAdapter foodsAdapter;
-    private FoodItemsViewModel viewModel;
 
     /**
      * Returns the title of the fragment.
      *
      * @return the title string for the Food Items screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Food Items";
@@ -57,7 +55,7 @@ public class FoodItemsFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(FoodItemsViewModel.class);
+        viewModel = getViewModel(FoodItemsViewModel.class);
         setupRecyclerView(view);
         viewModel.getFoods().observe(getViewLifecycleOwner(), foods -> {
             if (foods != null) {

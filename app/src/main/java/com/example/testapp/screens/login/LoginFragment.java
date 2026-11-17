@@ -10,10 +10,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.screens.register.RegisterFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
@@ -23,9 +21,8 @@ import com.example.testapp.utils.Validator;
  * LoginFragment handles the user authentication process.
  * It provides fields for email and password input and handles login and registration actions.
  */
-public class LoginFragment extends BaseFragment implements View.OnClickListener {
+public class LoginFragment extends BaseFragment<LoginViewModel> implements View.OnClickListener {
     private static final String TAG = "LoginFragment";
-    private LoginViewModel viewModel;
     private EditText etEmail, etPassword;
     private Button btnLogin;
     private TextView tvRegister;
@@ -35,6 +32,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
      *
      * @return the title string for the Login screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Login";
@@ -73,7 +71,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(LoginViewModel.class);
+        viewModel = getViewModel(LoginViewModel.class);
         etEmail = view.findViewById(R.id.et_login_email);
         etPassword = view.findViewById(R.id.et_login_password);
         btnLogin = view.findViewById(R.id.btn_login_login);

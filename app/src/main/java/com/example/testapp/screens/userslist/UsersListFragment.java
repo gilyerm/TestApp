@@ -9,13 +9,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.UserAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.models.User;
 import com.example.testapp.screens.userprofile.UserProfileFragment;
 
@@ -23,17 +21,17 @@ import com.example.testapp.screens.userprofile.UserProfileFragment;
  * UsersListFragment displays a list of users for administrators.
  * Admins can select users to view their profiles.
  */
-public class UsersListFragment extends BaseFragment {
+public class UsersListFragment extends BaseFragment<UsersListViewModel> {
     private static final String TAG = "UsersListFragment";
     private UserAdapter userAdapter;
     private TextView tvUserCount;
-    private UsersListViewModel viewModel;
 
     /**
      * Returns the title of the fragment.
      *
      * @return the title string for the Users List screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Users List";
@@ -66,7 +64,7 @@ public class UsersListFragment extends BaseFragment {
             }
         });
         usersList.setAdapter(userAdapter);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(UsersListViewModel.class);
+        viewModel = getViewModel(UsersListViewModel.class);
         setupObservers();
         return view;
     }

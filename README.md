@@ -153,10 +153,10 @@ Splash ──(logged in)──────────────────�
 
 ## ➕ Adding a New Screen
 
-1. Create `screens/<name>/` with `<Name>Fragment` and `<Name>ViewModel`.
+1. Create `screens/<name>/` with `<Name>Fragment` and `<Name>ViewModel` (skip the ViewModel if the screen has no data or logic; then use `BaseFragment<ViewModel>` and skip step 4 — see `landing/`).
 2. Make the ViewModel extend `ViewModel` and take **one** constructor argument: `IDatabaseService`.
-3. Make the Fragment extend `BaseFragment`, implement `getTitle()`, and override `shouldShowBackButton()` if it is a root screen.
-4. Get the ViewModel with `new ViewModelProvider(this, new ViewModelFactory()).get(<Name>ViewModel.class)`.
+3. Make the Fragment extend `BaseFragment<<Name>ViewModel>`, implement `getTitle()`, and override `shouldShowBackButton()` if it is a root screen.
+4. Assign the inherited `viewModel` field: `viewModel = getViewModel(<Name>ViewModel.class);`.
 5. Add a layout `res/layout/fragment_<name>.xml`.
 6. Open it from another screen with `navigationHost.navigateTo(new <Name>Fragment(), true)`.
 

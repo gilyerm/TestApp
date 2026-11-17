@@ -6,10 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModel;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.allcarts.AllCartsFragment;
 import com.example.testapp.screens.fooditems.FoodItemsFragment;
 import com.example.testapp.screens.userslist.UsersListFragment;
@@ -18,14 +17,14 @@ import com.example.testapp.screens.userslist.UsersListFragment;
  * AdminFragment is responsible for displaying the admin dashboard.
  * It provides navigation to users, foods, and carts management.
  */
-public class AdminFragment extends BaseFragment {
-    private AdminViewModel viewModel;
+public class AdminFragment extends BaseFragment<ViewModel> {
 
     /**
      * Returns the title of the fragment.
      *
      * @return the title string for the Admin Dashboard.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Admin Dashboard";
@@ -64,8 +63,6 @@ public class AdminFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ViewModelFactory factory = new ViewModelFactory();
-        viewModel = new ViewModelProvider(this, factory).get(AdminViewModel.class);
         View cardUsers = view.findViewById(R.id.card_users);
         View cardFoods = view.findViewById(R.id.card_foods);
         View cardCarts = view.findViewById(R.id.card_carts);

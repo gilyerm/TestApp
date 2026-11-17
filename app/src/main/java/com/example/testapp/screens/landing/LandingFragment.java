@@ -7,10 +7,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModel;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.login.LoginFragment;
 import com.example.testapp.screens.register.RegisterFragment;
 
@@ -18,8 +17,7 @@ import com.example.testapp.screens.register.RegisterFragment;
  * LandingFragment represents the landing screen of the application.
  * It provides users with options to either log in or register.
  */
-public class LandingFragment extends BaseFragment implements View.OnClickListener {
-    private LandingViewModel viewModel;
+public class LandingFragment extends BaseFragment<ViewModel> implements View.OnClickListener {
     private Button btnLogin, btnRegister;
 
     /**
@@ -27,6 +25,7 @@ public class LandingFragment extends BaseFragment implements View.OnClickListene
      *
      * @return the title string for the Landing screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Landing";
@@ -65,7 +64,6 @@ public class LandingFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(LandingViewModel.class);
         btnLogin = view.findViewById(R.id.btn_landing_login);
         btnRegister = view.findViewById(R.id.btn_landing_register);
         btnLogin.setOnClickListener(this);

@@ -9,21 +9,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.models.Cart;
 
 /**
  * CartDetailFragment displays the details of a specific cart.
  * It shows the title, total items, total price, and the list of food items in the cart.
  */
-public class CartDetailFragment extends BaseFragment {
-    private CartDetailViewModel viewModel;
+public class CartDetailFragment extends BaseFragment<CartDetailViewModel> {
     private TextView tvCartTitle;
     private TextView tvCartTotalAmount, tvCartTotalPrice;
     private RecyclerView rvCartItems;
@@ -59,7 +56,7 @@ public class CartDetailFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(CartDetailViewModel.class);
+        viewModel = getViewModel(CartDetailViewModel.class);
         String cartId = null;
         if (getArguments() != null) {
             cartId = getArguments().getString("cart_id");
@@ -101,6 +98,7 @@ public class CartDetailFragment extends BaseFragment {
      *
      * @return the title string for the Cart Details screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Cart Details";

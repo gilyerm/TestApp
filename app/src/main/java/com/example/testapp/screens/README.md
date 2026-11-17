@@ -1,6 +1,6 @@
 # 🖥️ screens
 
-> Every UI screen of the app. Each screen is a folder with a **Fragment** (the View) and a **ViewModel** (state and logic).
+> Every UI screen of the app. Each screen is a folder with a **Fragment** (the View) and, if it has data or logic, a **ViewModel** (state and logic).
 
 All fragments extend [`BaseFragment`](../core/) and are shown inside `MainActivity`. ViewModels are created with [`ViewModelFactory`](../core/), which passes them the `IDatabaseService`.
 
@@ -48,19 +48,32 @@ public class UsersListViewModel extends ViewModel {
 }
 
 // <Name>Fragment
-public class UsersListFragment extends BaseFragment {
+public class UsersListFragment extends BaseFragment<UsersListViewModel> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        UsersListViewModel vm = new ViewModelProvider(this, new ViewModelFactory()).get(UsersListViewModel.class);
-        vm.getUsers().observe(getViewLifecycleOwner(), users -> { /* update UI */ });
-        vm.loadUsers();
+        viewModel = getViewModel(UsersListViewModel.class);   // field from BaseFragment
+        viewModel.getUsers().observe(getViewLifecycleOwner(), users -> { /* update UI */ });
+        viewModel.loadUsers();
     }
 
+    @NonNull
     @Override
     protected String getTitle() { return "Users List"; }
 }
 ```
+
+## Screens without a ViewModel
+
+A screen with no data or logic (only buttons that navigate) does not need a ViewModel. Use plain `ViewModel` as the generic and never call `getViewModel(...)`. See [`landing/`](landing/) and [`admin/`](admin/):
+
+```java
+public class LandingFragment extends BaseFragment<ViewModel> { ... }
+```
+
+In these screens the inherited `viewModel` field stays `null`, so never use it (`viewModel.something()` would throw a `NullPointerException`).
+
+Do not call `getViewModel(ViewModel.class)`: `ViewModel` is abstract, so the app would crash.
 
 ## Rules
 

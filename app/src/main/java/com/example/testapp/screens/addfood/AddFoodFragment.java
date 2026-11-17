@@ -18,10 +18,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.utils.ImageUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
@@ -29,20 +27,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
  * AddFoodFragment provides the user interface for adding new food items.
  * It handles image selection (gallery or camera) and food detail inputs.
  */
-public class AddFoodFragment extends BaseFragment implements View.OnClickListener {
+public class AddFoodFragment extends BaseFragment<AddFoodViewModel> implements View.OnClickListener {
     private static final String TAG = "AddFoodFragment";
     private EditText foodNameEditText, foodPriceEditText;
     private Button addFoodButton;
     private ImageView foodImageView;
     private ActivityResultLauncher<Intent> selectImageLauncher;
     private ActivityResultLauncher<Intent> captureImageLauncher;
-    private AddFoodViewModel viewModel;
 
     /**
      * Returns the title of the fragment.
      *
      * @return the title string for the Add Food screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Add Food";
@@ -99,7 +97,7 @@ public class AddFoodFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(AddFoodViewModel.class);
+        viewModel = getViewModel(AddFoodViewModel.class);
         ImageUtil.requestPermission(requireActivity());
         foodNameEditText = view.findViewById(R.id.food_name);
         foodPriceEditText = view.findViewById(R.id.food_price);

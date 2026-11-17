@@ -5,7 +5,7 @@
 | Class | Type | Description |
 |:------|:-----|:------------|
 | `NavigationHost` | Interface | Implemented by `MainActivity`. Lets fragments navigate and update the toolbar without knowing the Activity. |
-| `BaseFragment` | Abstract class | Base class for every screen fragment. Gets the `NavigationHost` and sets the toolbar for the screen. |
+| `BaseFragment<T extends ViewModel>` | Abstract class | Base class for every screen fragment. Gets the `NavigationHost`, sets the toolbar, and holds the screen's `viewModel`. |
 | `ViewModelFactory` | `ViewModelProvider.Factory` | Creates ViewModels and passes them the shared `IDatabaseService`. |
 
 ## `NavigationHost`
@@ -24,6 +24,8 @@
 - **`onResume`** — sets the toolbar title from `getTitle()` and the back button from `shouldShowBackButton()`.
 - **`getTitle()`** — *abstract*; return the toolbar title.
 - **`shouldShowBackButton()`** — defaults to `true`; override to return `false` on root screens (Splash, Landing, Dashboard).
+- **`viewModel`** — protected field of type `T`; assign it in the screen with `getViewModel(...)`.
+- **`getViewModel(Class<T>)`** — returns the screen's ViewModel, created with `ViewModelFactory`.
 
 Subclasses use the protected `navigationHost` field:
 
@@ -36,7 +38,9 @@ navigationHost.navigateTo(new MyCartsFragment(), true);
 Gets `DatabaseService.getInstance()` and calls the ViewModel's constructor that takes **one `IDatabaseService` argument** (found by reflection). Every ViewModel must have that constructor, even if it does not use the service.
 
 ```java
-viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(LoginViewModel.class);
+public class LoginFragment extends BaseFragment<LoginViewModel> { ... }
+
+viewModel = getViewModel(LoginViewModel.class);   // BaseFragment helper; uses ViewModelFactory
 ```
 
 Because the service is passed in instead of created inside the ViewModel, tests can pass a fake `IDatabaseService`.

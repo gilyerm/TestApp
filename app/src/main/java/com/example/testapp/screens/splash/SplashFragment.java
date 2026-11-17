@@ -6,10 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.screens.landing.LandingFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
@@ -18,14 +16,14 @@ import com.example.testapp.utils.SharedPreferencesUtil;
  * SplashFragment represents the initial splash screen of the application.
  * It handles the timer and navigation to the landing or main dashboard screen based on user login status.
  */
-public class SplashFragment extends BaseFragment {
-    private SplashViewModel viewModel;
+public class SplashFragment extends BaseFragment<SplashViewModel> {
 
     /**
      * Returns the title of the fragment.
      *
      * @return the title string for the Splash screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "";
@@ -64,7 +62,7 @@ public class SplashFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(SplashViewModel.class);
+        viewModel = getViewModel(SplashViewModel.class);
         viewModel.getNavigateToLanding().observe(getViewLifecycleOwner(), navigate -> {
             if (navigate != null && navigate) navigationHost.navigateTo(new LandingFragment(), false);
         });

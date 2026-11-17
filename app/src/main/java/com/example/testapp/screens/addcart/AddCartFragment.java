@@ -13,13 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.FoodsAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.models.Food;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -30,9 +28,8 @@ import java.util.List;
  * AddCartFragment provides a user interface for creating a new cart.
  * Users can select foods, add them to the cart, and name the cart.
  */
-public class AddCartFragment extends BaseFragment implements View.OnClickListener {
+public class AddCartFragment extends BaseFragment<AddCartViewModel> implements View.OnClickListener {
     private static final String TAG = "AddCartFragment";
-    private AddCartViewModel viewModel;
     private AutoCompleteTextView foodSelector;
     private Button createCartButton;
     private FloatingActionButton addButton;
@@ -108,7 +105,7 @@ public class AddCartFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(AddCartViewModel.class);
+        viewModel = getViewModel(AddCartViewModel.class);
         viewModel.foods.observe(getViewLifecycleOwner(), foods -> {
             allFoods.clear();
             allFoods.addAll(foods);
@@ -158,6 +155,7 @@ public class AddCartFragment extends BaseFragment implements View.OnClickListene
      *
      * @return the title string for the Add Cart screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Add Cart";

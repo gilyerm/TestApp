@@ -11,10 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.models.User;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
@@ -24,10 +22,9 @@ import com.example.testapp.screens.landing.LandingFragment;
  * UserProfileFragment displays and manages a user's profile information.
  * It allows the user to update their details or an admin to view them.
  */
-public class UserProfileFragment extends BaseFragment implements View.OnClickListener {
+public class UserProfileFragment extends BaseFragment<UserProfileViewModel> implements View.OnClickListener {
     private static final String TAG = "UserProfileFragment";
     private static final String ARG_USER_UID = "USER_UID";
-    private UserProfileViewModel viewModel;
     private EditText etUserFirstName, etUserLastName, etUserEmail, etUserPhone, etUserPassword;
     private TextView tvUserDisplayName, tvUserDisplayEmail;
     private Button btnUpdateProfile, btnSignOut;
@@ -55,6 +52,7 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
      *
      * @return the title string for the User Profile screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "User Profile";
@@ -104,7 +102,7 @@ public class UserProfileFragment extends BaseFragment implements View.OnClickLis
         if (!isCurrentUser) {
             btnSignOut.setVisibility(View.GONE);
         }
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(UserProfileViewModel.class);
+        viewModel = getViewModel(UserProfileViewModel.class);
         setupObservers();
         viewModel.loadUser(selectedUid);
         return view;

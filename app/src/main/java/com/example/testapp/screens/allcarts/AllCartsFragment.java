@@ -7,21 +7,18 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.cartdetail.CartDetailFragment;
 
 /**
  * AllCartsFragment displays a list of all available carts from the database.
  * Users can view details for any cart from the list.
  */
-public class AllCartsFragment extends BaseFragment {
-    private AllCartsViewModel viewModel;
+public class AllCartsFragment extends BaseFragment<AllCartsViewModel> {
     private CartAdapter cartAdapter;
 
     /**
@@ -58,7 +55,7 @@ public class AllCartsFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(AllCartsViewModel.class);
+        viewModel = getViewModel(AllCartsViewModel.class);
         viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
             cartAdapter.setCartList(carts);
         });
@@ -73,6 +70,7 @@ public class AllCartsFragment extends BaseFragment {
      *
      * @return the title string for the All Carts screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "All Carts";

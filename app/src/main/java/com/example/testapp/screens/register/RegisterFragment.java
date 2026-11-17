@@ -11,10 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import com.example.testapp.R;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.screens.dashboard.MainDashboardFragment;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.utils.Validator;
@@ -23,9 +21,8 @@ import com.example.testapp.utils.Validator;
  * RegisterFragment handles new user registration.
  * It provides input fields for user details and registers them through the ViewModel.
  */
-public class RegisterFragment extends BaseFragment implements View.OnClickListener {
+public class RegisterFragment extends BaseFragment<RegisterViewModel> implements View.OnClickListener {
     private static final String TAG = "RegisterFragment";
-    private RegisterViewModel viewModel;
     private EditText etEmail, etPassword, etFName, etLName, etPhone;
     private Button btnRegister;
     private TextView tvLogin;
@@ -35,6 +32,7 @@ public class RegisterFragment extends BaseFragment implements View.OnClickListen
      *
      * @return the title string for the Register screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "Register";
@@ -73,7 +71,7 @@ public class RegisterFragment extends BaseFragment implements View.OnClickListen
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(RegisterViewModel.class);
+        viewModel = getViewModel(RegisterViewModel.class);
         etEmail = view.findViewById(R.id.et_register_email);
         etPassword = view.findViewById(R.id.et_register_password);
         etFName = view.findViewById(R.id.et_register_first_name);

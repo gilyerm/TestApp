@@ -8,13 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.testapp.R;
 import com.example.testapp.adapters.CartAdapter;
 import com.example.testapp.core.BaseFragment;
-import com.example.testapp.core.ViewModelFactory;
 import com.example.testapp.utils.SharedPreferencesUtil;
 import com.example.testapp.screens.addcart.AddCartFragment;
 import com.example.testapp.screens.cartdetail.CartDetailFragment;
@@ -24,8 +22,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
  * MyCartsFragment displays a list of carts created by the currently logged-in user.
  * It provides functionality to view cart details or add a new cart.
  */
-public class MyCartsFragment extends BaseFragment {
-    private MyCartsViewModel viewModel;
+public class MyCartsFragment extends BaseFragment<MyCartsViewModel> {
     private RecyclerView recyclerView;
     private CartAdapter cartAdapter;
     private ProgressBar progressBar;
@@ -70,7 +67,7 @@ public class MyCartsFragment extends BaseFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(this, new ViewModelFactory()).get(MyCartsViewModel.class);
+        viewModel = getViewModel(MyCartsViewModel.class);
         viewModel.carts.observe(getViewLifecycleOwner(), carts -> {
             cartAdapter.setCartList(carts);
             if (carts.isEmpty()) {
@@ -92,6 +89,7 @@ public class MyCartsFragment extends BaseFragment {
      *
      * @return the title string for the My Carts screen.
      */
+    @NonNull
     @Override
     protected String getTitle() {
         return "My Carts";
